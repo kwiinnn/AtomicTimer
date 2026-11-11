@@ -10,10 +10,11 @@ import { PUZZLES } from '../../core/model';
 import { t } from '../i18n';
 import { PuzzlePicker } from '../sessions/PuzzlePicker';
 import { SessionMenu } from '../sessions/SessionPicker';
-import { useApp } from '../state/AppContext';
+import { useApp, useTimerBusy } from '../state/AppContext';
 
 export function TopBar({ onMenu, showTitle }: { onMenu: () => void; showTitle: boolean }) {
-  const { session, openPuzzlePicker, openSessionPicker, timerBusy } = useApp();
+  const { session, openPuzzlePicker, openSessionPicker } = useApp();
+  const timerBusy = useTimerBusy();
   const sessionAnchor = useRef<HTMLButtonElement>(null);
   if (!session) return null;
   return (

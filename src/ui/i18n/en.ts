@@ -40,6 +40,7 @@ export const en = {
   'undo.solveDeleted': 'Solve deleted',
   'times.empty': 'No solves yet — press and hold Space (or touch and hold) to start.',
   'times.label': 'Solves',
+  'times.more': 'Show more ({count} older)',
   'sheet.scramble': 'Scramble',
   'sheet.comment': 'Comment',
   'sheet.addComment': 'Add comment',

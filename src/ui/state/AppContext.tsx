@@ -22,7 +22,7 @@ export interface AppState {
   /** Switches to the first session of `puzzle`, creating one if none exists. */
   selectPuzzle(puzzle: PuzzleId): Promise<void>;
   createSession(name: string, puzzle: PuzzleId): Promise<Session>;
-  timerBusy: boolean;
+  /** Updates the busy flag read via useTimerBusy(); kept out of this context so timer state changes don't re-render every consumer. */
   setTimerBusy(b: boolean): void;
   view: View;
   setView(v: View): void;
@@ -37,6 +37,12 @@ export interface AppState {
 }
 
 const Ctx = createContext<AppState | null>(null);
+const BusyCtx = createContext(false);
+
+/** True while a solve is in progress (inspecting, holding, ready or running). */
+export function useTimerBusy(): boolean {
+  return useContext(BusyCtx);
+}
 
 export function useApp(): AppState {
   const v = useContext(Ctx);
@@ -58,7 +64,12 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
   const latest = useRef<Settings | null>(null);
   const settings = local ?? stored;
   const sessions = useLiveQuery(() => storage.listSessions(), [storage]);
-  const [timerBusy, setTimerBusy] = useState(false);
+  const [timerBusy, setTimerBusyState] = useState(false);
+  const busyRef = useRef(false);
+  const setTimerBusy = useCallback((b: boolean) => {
+    busyRef.current = b;
+    setTimerBusyState(b);
+  }, []);
   const [view, setView] = useState<View>('timer');
   const [picker, setPicker] = useState<Picker>(null);
   const [sessionDialog, setSessionDialog] = useState<SessionDialog>(null);
@@ -108,20 +119,20 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
 
   const selectSession = useCallback(
     (id: string) => {
-      if (timerBusy) return;
+      if (busyRef.current) return;
       void updateSettings({ currentSessionId: id });
     },
-    [timerBusy, updateSettings],
+    [updateSettings],
   );
 
   const selectPuzzle = useCallback(
     async (puzzle: PuzzleId) => {
-      if (timerBusy) return;
+      if (busyRef.current) return;
       const existing = (await storage.listSessions()).find(x => x.puzzle === puzzle);
       if (existing) await updateSettings({ currentSessionId: existing.id });
       else await createSession(t('session.default'), puzzle);
     },
-    [timerBusy, storage, updateSettings, createSession],
+    [storage, updateSettings, createSession],
   );
 
   const value = useMemo<AppState>(
@@ -136,13 +147,12 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
       selectSession,
       selectPuzzle,
       createSession,
-      timerBusy,
       setTimerBusy,
       view,
       setView,
       picker,
-      openPuzzlePicker: () => !timerBusy && setPicker('puzzle'),
-      openSessionPicker: () => !timerBusy && setPicker('session'),
+      openPuzzlePicker: () => !busyRef.current && setPicker('puzzle'),
+      openSessionPicker: () => !busyRef.current && setPicker('session'),
       closePicker: () => setPicker(null),
       sessionDialog,
       setSessionDialog,
@@ -150,9 +160,13 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
       setThemeDialogOpen,
     }),
     [storage, scrambles, s, updateSettings, sessions, session, solves, selectSession, selectPuzzle, createSession,
-      timerBusy, view, picker, sessionDialog, themeDialogOpen],
+      setTimerBusy, view, picker, sessionDialog, themeDialogOpen],
   );
 
   if (!settings || !sessions || !session) return <>{fallback ?? null}</>;
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={value}>
+      <BusyCtx.Provider value={timerBusy}>{children}</BusyCtx.Provider>
+    </Ctx.Provider>
+  );
 }

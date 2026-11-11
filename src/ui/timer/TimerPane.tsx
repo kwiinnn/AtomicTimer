@@ -38,7 +38,7 @@ function inspectionText(startedAt: number, now: number): string {
 }
 
 export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => void }) {
-  const { session, settings, storage, scrambles, solves, setTimerBusy, timerBusy, openPuzzlePicker, openSessionPicker } = useApp();
+  const { session, settings, storage, scrambles, solves, setTimerBusy, openPuzzlePicker, openSessionPicker } = useApp();
   const recorder = useMemo(
     () => createSolveRecorder({ scrambles, save: s => storage.putSolve(s), newId, now }),
     [scrambles, storage],
@@ -155,7 +155,7 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
       sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', touchAction: 'pan-x', userSelect: 'none',
         WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
     >
-      <ScrambleBox scramble={scramble} error={scrambleError} scale={settings.scrambleTextScale} disabled={timerBusy}
+      <ScrambleBox scramble={scramble} error={scrambleError} scale={settings.scrambleTextScale} disabled={BUSY.has(state.kind)}
         onNext={() => void recorder.load(puzzle)} />
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, px: 2 }}>
         {settings.manualEntry ? (

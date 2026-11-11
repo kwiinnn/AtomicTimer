@@ -37,7 +37,9 @@ const IDLE: TimerState = { kind: 'idle' };
 const unhold = (insp: Insp): TimerState => (insp ? { kind: 'inspecting', insp } : IDLE);
 
 /** Emits due inspection alerts and the 17 s DNF. Returns null when nothing changes. */
-function inspectionTick(state: TimerState & { insp: Insp }, at: number): Result | null {
+type WithInsp = Extract<TimerState, { kind: 'inspecting' | 'holding' | 'ready' }>;
+
+function inspectionTick(state: WithInsp, at: number): Result | null {
   const insp = state.insp;
   if (!insp) return null;
   const elapsed = at - insp.startedAt;
@@ -55,7 +57,7 @@ function inspectionTick(state: TimerState & { insp: Insp }, at: number): Result 
     return { state: { kind: 'stopped', timeMs: 0, penalty: 'dnf' }, effects };
   }
   if (effects.length === 0) return null;
-  return { state: { ...state, insp: { ...insp, alerted } }, effects };
+  return { state: { ...state, insp: { ...insp, alerted } } as TimerState, effects };
 }
 
 export function step(s: TimerState, e: TimerEvent, cfg: TimerConfig): Result {

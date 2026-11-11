@@ -8,3 +8,6 @@ playwright-report
 tests/fixtures/private/
 .env*
 *.tsbuildinfo
+
+# personal timer exports dropped into the project folder
+orca_share_media*.txt

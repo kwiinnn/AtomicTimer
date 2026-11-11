@@ -106,6 +106,8 @@ export const en = {
   'common.ok': 'OK',
   'backup.reminder': 'Back up your times',
   'backup.action': 'Back up',
+  'update.available': 'Update available',
+  'update.reload': 'Reload',
   'shortcuts.title': 'Keyboard shortcuts',
   'stats.empty': 'Stats appear after your first solve.',
 } as const;

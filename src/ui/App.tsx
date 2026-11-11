@@ -21,6 +21,7 @@ import { ThemeDialog } from './settings/ThemeDialog';
 import { AboutPage } from './about/AboutPage';
 import { ImportExportPage } from './io/ImportExportPage';
 import { BackupReminder } from './io/BackupReminder';
+import { UpdatePrompt } from './components/UpdatePrompt';
 
 const storage = createDexieStorage();
 const scrambles = createScrambleService();
@@ -45,6 +46,7 @@ function Themed() {
         />
         <ThemeDialog />
         <BackupReminder />
+        <UpdatePrompt />
       </UndoProvider>
     </ThemeProvider>
   );

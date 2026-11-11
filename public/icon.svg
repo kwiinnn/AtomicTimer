@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#3f51b5"/>
+  <!-- stopwatch: crown, side button, dial -->
+  <rect x="226" y="72" width="60" height="34" rx="10" fill="#fff"/>
+  <rect x="244" y="100" width="24" height="30" fill="#fff"/>
+  <rect x="356" y="128" width="44" height="26" rx="9" fill="#fff" transform="rotate(45 378 141)"/>
+  <circle cx="256" cy="290" r="150" fill="none" stroke="#fff" stroke-width="28"/>
+  <!-- single electron orbit around the nucleus -->
+  <ellipse cx="256" cy="290" rx="92" ry="36" fill="none" stroke="#fff" stroke-width="14" opacity="0.85" transform="rotate(-30 256 290)"/>
+  <!-- hand -->
+  <line x1="256" y1="290" x2="256" y2="182" stroke="#fff" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="256" cy="290" r="30" fill="#ff4081"/>
+</svg>

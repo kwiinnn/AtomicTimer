@@ -45,6 +45,17 @@ export const en = {
   'sheet.addComment': 'Add comment',
   'sheet.editComment': 'Edit comment',
   'sheet.delete': 'Delete',
+  'stats.session': 'Session',
+  'stats.today': 'Today',
+  'stats.current': 'Current',
+  'stats.best': 'Best',
+  'stats.solves': 'Solves',
+  'stats.mean': 'Mean',
+  'stats.bestSingle': 'Best',
+  'stats.worstSingle': 'Worst',
+  'stats.graph': 'Graph',
+  'stats.single': 'Single',
+  'stats.empty': 'Stats appear after your first solve.',
 } as const;
 
 export type MessageKey = keyof typeof en;

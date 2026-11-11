@@ -3,9 +3,12 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import { useRef, useState, type ReactNode } from 'react';
 import { t } from '../i18n';
+import { useApp } from '../state/AppContext';
+import { PALETTES } from '../theme/palettes';
 
 /** Cubic Timer style: three swipeable panes kept in sync with the tab strip. */
 export function MobileTabs({ panes }: { panes: [ReactNode, ReactNode, ReactNode] }) {
+  const { settings } = useApp();
   const [tab, setTab] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
   const select = (i: number) => {
@@ -16,7 +19,7 @@ export function MobileTabs({ panes }: { panes: [ReactNode, ReactNode, ReactNode]
   return (
     <>
       <Tabs value={tab} onChange={(_, v: number) => select(v)} variant="fullWidth" textColor="inherit"
-        indicatorColor="secondary" className="hide-while-timing" sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+        indicatorColor="secondary" className="hide-while-timing" sx={{ bgcolor: PALETTES[settings.palette].primary, color: '#fff' }}>
         <Tab label={t('tab.timer')} />
         <Tab label={t('tab.times')} />
         <Tab label={t('tab.stats')} />

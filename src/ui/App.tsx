@@ -1,6 +1,5 @@
 import '@fontsource/quicksand/500.css';
 import '@fontsource/quicksand/700.css';
-import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import GlobalStyles from '@mui/material/GlobalStyles';
 import { ThemeProvider } from '@mui/material/styles';
@@ -15,6 +14,8 @@ import { makeTheme } from './theme/makeTheme';
 import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
+import { StatsPane } from './stats/StatsPane';
+import { E2EHooks } from './state/E2EHooks';
 
 const storage = createDexieStorage();
 const scrambles = createScrambleService();
@@ -28,11 +29,12 @@ function Themed() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' } }} />
+      <E2EHooks />
       <UndoProvider>
         <Shell
           timer={<TimerPane />}
           times={<TimesList />}
-          stats={<Box data-testid="stats-pane" sx={{ p: 2 }} />}
+          stats={<StatsPane />}
         />
       </UndoProvider>
     </ThemeProvider>

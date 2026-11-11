@@ -1,1 +1,1 @@
-{"root":["./src/main.tsx","./src/core/sanity.test.ts","./src/ui/App.tsx","./tests/e2e/smoke.spec.ts","./playwright.config.ts","./vite.config.ts","./vitest.config.ts"],"version":"6.0.3"}
+{"root":["./src/main.tsx","./src/core/model.ts","./src/core/sanity.test.ts","./src/core/time.test.ts","./src/core/time.ts","./src/ui/App.tsx","./tests/e2e/smoke.spec.ts","./playwright.config.ts","./vite.config.ts","./vitest.config.ts"],"version":"6.0.3"}

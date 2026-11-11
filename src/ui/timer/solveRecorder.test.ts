@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import type { Solve } from '../../core/model';
 import type { ScrambleService } from '../../platform/scramble';
-import { createSolveRecorder } from './solveRecorder';
+import { createSolveRecorder, SaveError } from './solveRecorder';
 
 function setup(scrambles: ScrambleService) {
   const saved: Solve[] = [];
@@ -61,4 +61,30 @@ test('subscribers are notified on change', async () => {
   await rec.load('333');
   off();
   expect(calls).toBeGreaterThan(0);
+});
+
+test('a scramble that arrives mid-solve was never shown, so it is not stored', async () => {
+  let resolve: (s: string) => void = () => {};
+  const { rec } = setup({ next: () => new Promise(r => { resolve = r; }), prefetch: () => {} });
+  const loading = rec.load('sq1');
+  rec.onStarted();
+  resolve('LATE');
+  await loading;
+  expect(rec.current()).toBe('LATE');
+  expect((await rec.onFinished('sess', 1, 'none', 'keyboard')).scramble).toBe('');
+});
+test('a failed save rejects with the unsaved solve and keeps the scramble', async () => {
+  let id = 0;
+  const rec = createSolveRecorder({
+    scrambles: queue('A', 'B'),
+    save: async () => { throw new Error('QuotaExceededError'); },
+    newId: () => `s${id++}`,
+    now: () => 5,
+  });
+  await rec.load('333');
+  rec.onStarted();
+  const err = await rec.onFinished('sess', 1234, 'none', 'keyboard').catch((e: unknown) => e);
+  expect(err).toBeInstanceOf(SaveError);
+  expect((err as SaveError).solve).toMatchObject({ timeMs: 1234, scramble: 'A', sessionId: 'sess' });
+  expect(rec.current()).toBe('A');
 });

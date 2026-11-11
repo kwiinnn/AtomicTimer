@@ -106,6 +106,8 @@ export const en = {
   'common.ok': 'OK',
   'backup.reminder': 'Back up your times',
   'backup.action': 'Back up',
+  'save.failed': 'Could not save the last solve',
+  'save.retry': 'Retry',
   'update.available': 'Update available',
   'update.reload': 'Reload',
   'shortcuts.title': 'Keyboard shortcuts',

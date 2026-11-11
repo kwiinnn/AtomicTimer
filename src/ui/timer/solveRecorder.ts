@@ -1,6 +1,14 @@
 import type { Penalty, PuzzleId, Solve, SolveSource } from '../../core/model';
 import type { ScrambleService } from '../../platform/scramble';
 
+/** Thrown by onFinished when storage rejects the write; carries the solve so it can be retried. */
+export class SaveError extends Error {
+  constructor(readonly solve: Solve, cause: unknown) {
+    super(`Could not save the solve: ${cause instanceof Error ? cause.message : String(cause)}`);
+    this.name = 'SaveError';
+  }
+}
+
 export interface SolveRecorder {
   /** The scramble currently shown, or null while the first one is generating. */
   current(): string | null;
@@ -24,6 +32,7 @@ export function createSolveRecorder(deps: {
   let current: string | null = null;
   let error: string | null = null;
   let frozen: string | null = null;
+  let started = false;
   let puzzle: PuzzleId | null = null;
   let token = 0;
   const listeners = new Set<() => void>();
@@ -53,6 +62,7 @@ export function createSolveRecorder(deps: {
     error: () => error,
     load,
     onStarted() {
+      started = true;
       frozen = current;
     },
     async onFinished(sessionId, timeMs, penalty, source) {
@@ -61,13 +71,19 @@ export function createSolveRecorder(deps: {
         sessionId,
         timeMs,
         penalty,
-        scramble: frozen ?? current ?? '',
+        // Started: the scramble on screen at start (none shown → ''). Not started (manual entry, inspection DNF): current.
+        scramble: (started ? frozen : current) ?? '',
         createdAt: deps.now(),
         comment: '',
         source,
       };
       frozen = null;
-      await deps.save(solve);
+      started = false;
+      try {
+        await deps.save(solve);
+      } catch (e) {
+        throw new SaveError(solve, e);
+      }
       if (puzzle) void load(puzzle);
       return solve;
     },

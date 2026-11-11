@@ -18,7 +18,9 @@ import { playInspectionAlert } from './alerts';
 import { ManualEntry } from './ManualEntry';
 import { QuickActions, useSolveActions } from './QuickActions';
 import { ScrambleBox } from './ScrambleBox';
-import { createSolveRecorder } from './solveRecorder';
+import { createSolveRecorder, SaveError } from './solveRecorder';
+import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
 import { TimerDisplay } from './TimerDisplay';
 import { useTimer } from './useTimer';
 
@@ -61,15 +63,18 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
     if (display.current && display.current.textContent !== text) display.current.textContent = text;
   };
 
+  const [unsaved, setUnsaved] = useState<{ solve: Solve; retry: () => Promise<void> } | null>(null);
   const record = useCallback(
     (timeMs: number, penalty: Penalty, source: Solve['source']) => {
       const result = { timeMs, penalty };
       setLastRec({ sessionId, id: null, result });
-      void recorder.onFinished(sessionId, timeMs, penalty, source).then(s =>
-        setLastRec(r => (r?.result === result ? { ...r, id: s.id } : r)),
-      );
+      const attach = (s: Solve) => setLastRec(r => (r?.result === result ? { ...r, id: s.id } : r));
+      recorder.onFinished(sessionId, timeMs, penalty, source).then(attach, (e: unknown) => {
+        // Keep the unsaved solve in memory and offer a retry instead of losing it silently.
+        if (e instanceof SaveError) setUnsaved({ solve: e.solve, retry: () => storage.putSolve(e.solve).then(() => attach(e.solve)) });
+      });
     },
-    [recorder, sessionId],
+    [recorder, sessionId, storage],
   );
 
   const { state, pointerHandlers } = useTimer(
@@ -169,6 +174,12 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
       <Box className="hide-while-timing" data-no-timer sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
         {scramble && <ScrambleImage puzzle={puzzle} scramble={scramble} height={110} onClick={() => setEnlarged(true)} />}
       </Box>
+      <Snackbar open={!!unsaved} message={t('save.failed')} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        action={<Button color="secondary" size="small" onClick={() => {
+          const u = unsaved;
+          if (!u) return;
+          void u.retry().then(() => { setUnsaved(null); void recorder.load(puzzle); }, () => {});
+        }}>{t('save.retry')}</Button>} />
       <ShortcutOverlay open={help} onClose={() => setHelp(false)} />
       {commentFor && <CommentDialog solve={commentFor} onClose={() => setCommentFor(null)} />}
       <Dialog open={enlarged && !!scramble} onClose={() => setEnlarged(false)} fullWidth maxWidth="sm">

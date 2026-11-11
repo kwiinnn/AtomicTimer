@@ -24,6 +24,7 @@ import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import { TimerDisplay } from './TimerDisplay';
 import { useTimer } from './useTimer';
+import { isFocus } from './focus';
 
 const BUSY = new Set<TimerState['kind']>(['inspecting', 'holding', 'ready', 'running']);
 const HIDE_UI = new Set<TimerState['kind']>(['inspecting', 'running']);
@@ -161,7 +162,7 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
         {settings.manualEntry ? (
           <ManualEntry onSubmit={(timeMs, penalty) => record(timeMs, penalty, 'manual')} />
         ) : (
-          <TimerDisplay ref={display} kind={state.kind} inspecting={settings.inspection} scale={settings.timerTextScale} />
+          <TimerDisplay ref={display} kind={state.kind} inspecting={settings.inspection} scale={settings.timerTextScale} focus={isFocus(state)} />
         )}
         <Box sx={{ minHeight: 48 }}>
           {last && !BUSY.has(state.kind) && (

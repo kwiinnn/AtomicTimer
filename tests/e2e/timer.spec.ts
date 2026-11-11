@@ -31,9 +31,13 @@ test.describe('desktop', () => {
   });
 
   test('early release does not start', async ({ page }) => {
-    await page.keyboard.down('Space');
-    await page.waitForTimeout(100);
-    await page.keyboard.up('Space');
+    // Dispatched in-page so a loaded test machine cannot stretch the 100 ms press past the 300 ms hold.
+    await page.evaluate(async () => {
+      const fire = (type: string) => window.dispatchEvent(new KeyboardEvent(type, { key: ' ', code: 'Space', bubbles: true }));
+      fire('keydown');
+      await new Promise(r => setTimeout(r, 100));
+      fire('keyup');
+    });
     await page.waitForTimeout(300);
     await expect(display(page)).toHaveText('0.00');
     await expect(pane(page)).toHaveAttribute('data-solve-count', '0');

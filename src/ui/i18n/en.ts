@@ -55,6 +55,7 @@ export const en = {
   'stats.worstSingle': 'Worst',
   'stats.graph': 'Graph',
   'stats.single': 'Single',
+  'shortcuts.title': 'Keyboard shortcuts',
   'stats.empty': 'Stats appear after your first solve.',
 } as const;
 

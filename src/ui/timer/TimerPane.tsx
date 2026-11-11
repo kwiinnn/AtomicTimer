@@ -8,11 +8,15 @@ import { formatSolve, formatTime } from '../../core/time';
 import { INSPECTION, type TimerState } from '../../core/timer/machine';
 import { setKeepAwake } from '../../platform/device';
 import { ScrambleImage } from '../components/ScrambleImage';
+import { ShortcutOverlay } from '../components/ShortcutOverlay';
+import { useUndo } from '../components/UndoSnackbar';
+import { useShortcuts } from '../hooks/shortcuts';
+import { CommentDialog } from '../times/CommentDialog';
 import { t } from '../i18n';
 import { useApp } from '../state/AppContext';
 import { playInspectionAlert } from './alerts';
 import { ManualEntry } from './ManualEntry';
-import { QuickActions } from './QuickActions';
+import { QuickActions, useSolveActions } from './QuickActions';
 import { ScrambleBox } from './ScrambleBox';
 import { createSolveRecorder } from './solveRecorder';
 import { TimerDisplay } from './TimerDisplay';
@@ -31,7 +35,7 @@ function inspectionText(startedAt: number, now: number): string {
 }
 
 export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => void }) {
-  const { session, settings, storage, scrambles, solves, setTimerBusy, timerBusy } = useApp();
+  const { session, settings, storage, scrambles, solves, setTimerBusy, timerBusy, openPuzzlePicker, openSessionPicker } = useApp();
   const recorder = useMemo(
     () => createSolveRecorder({ scrambles, save: s => storage.putSolve(s), newId, now }),
     [scrambles, storage],
@@ -111,6 +115,30 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
   }, [state.kind]);
 
   const [enlarged, setEnlarged] = useState(false);
+  const [help, setHelp] = useState(false);
+  const [commentFor, setCommentFor] = useState<Solve | null>(null);
+  const { togglePenalty, remove } = useSolveActions();
+  const { showUndo } = useUndo();
+  const newest = solves.at(-1);
+  useShortcuts(
+    {
+      plus2: () => newest && void togglePenalty(newest, 'plus2'),
+      dnf: () => newest && void togglePenalty(newest, 'dnf'),
+      comment: () => newest && setCommentFor(newest),
+      deleteLast: async () => {
+        if (!newest) return;
+        const removed = await remove(newest);
+        if (!removed) return;
+        setLastRec(null);
+        showUndo(t('undo.solveDeleted'), () => storage.putSolve(removed));
+      },
+      nextScramble: () => void recorder.load(puzzle),
+      puzzlePicker: openPuzzlePicker,
+      sessionPicker: openSessionPicker,
+      help: () => setHelp(true),
+    },
+    BUSY.has(state.kind),
+  );
 
   return (
     <Box
@@ -141,6 +169,8 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
       <Box className="hide-while-timing" data-no-timer sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
         {scramble && <ScrambleImage puzzle={puzzle} scramble={scramble} height={110} onClick={() => setEnlarged(true)} />}
       </Box>
+      <ShortcutOverlay open={help} onClose={() => setHelp(false)} />
+      {commentFor && <CommentDialog solve={commentFor} onClose={() => setCommentFor(null)} />}
       <Dialog open={enlarged && !!scramble} onClose={() => setEnlarged(false)} fullWidth maxWidth="sm">
         <DialogTitle>{t('scramble.enlarge')}</DialogTitle>
         <DialogContent>

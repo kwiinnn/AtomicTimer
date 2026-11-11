@@ -33,3 +33,7 @@ test('unrecognized and empty messages', () => {
   expect(() => parseImport('hello')).toThrow('Unrecognized file format');
   expect(() => parseImport(JSON.stringify({ session1: [] }))).toThrow('This file contains no solves');
 });
+
+test('detects a 4-field Cubic Timer external export', () => {
+  expect(detectFormat('"28.820";"D\' F2";"2021-07-05T14:01:47.656+08:00";""\n')).toBe('cubic-external');
+});

@@ -6,6 +6,7 @@ import { parseCubicBackup, parseCubicExternal, toCubicBackup } from './cubicTime
 
 const read = (f: string) => readFileSync(join(__dirname, 'fixtures', f), 'utf8');
 const PRIVATE = join(__dirname, '../../../tests/fixtures/private/cubic-backup.csv');
+const PRIVATE_EXTERNAL = join(__dirname, '../../../tests/fixtures/private/cubic-external.txt');
 
 test('backup: one session per puzzle+category', () => {
   const b = parseCubicBackup(read('cubic-backup.sample.csv'));
@@ -56,5 +57,18 @@ test('external format counts unparseable lines as unsupported', () => {
 test.skipIf(!existsSync(PRIVATE))('real export parses without unsupported rows', () => {
   const b = parseCubicBackup(readFileSync(PRIVATE, 'utf8'));
   expect(b.solves.length).toBeGreaterThan(0);
+  expect(b.skippedUnsupported).toBe(0);
+});
+
+test('external format with a 4th (comment) field, as real exports have', () => {
+  const b = parseCubicExternal('"28.820";"D\' F2 L2";"2021-07-05T14:01:47.656+08:00";""\n"21.910";"R";"2022-01-18T19:27:27.085+08:00";"lucky"\n', '333', 'X');
+  expect(b.solves.map(s => [s.timeMs, s.comment])).toEqual([[28820, ''], [21910, 'lucky']]);
+  expect(b.skippedUnsupported).toBe(0);
+});
+test.skipIf(!existsSync(PRIVATE_EXTERNAL))('real external export imports every line', () => {
+  const text = readFileSync(PRIVATE_EXTERNAL, 'utf8');
+  const lines = text.split(/\r?\n/).filter(Boolean).length;
+  const b = parseCubicExternal(text, '333', 'Real');
+  expect(b.solves).toHaveLength(lines);
   expect(b.skippedUnsupported).toBe(0);
 });

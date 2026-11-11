@@ -6,7 +6,8 @@ import { ImportError, type ImportBatch } from './types';
 
 export type ImportFormat = 'atomic' | 'cubic-backup' | 'cubic-external' | 'cstimer';
 
-const EXTERNAL_LINE = /^"[^"]*";"[^"]*";"[^"]*"$/;
+// time;scramble;date with an optional 4th comment field (real Cubic Timer exports have 4).
+const EXTERNAL_LINE = /^"[^"]*";"[^"]*";"[^"]*"(;"[^"]*")?$/;
 
 export function detectFormat(text: string): ImportFormat | null {
   const trimmed = (text.charCodeAt(0) === 0xfeff ? text.slice(1) : text).trimStart();

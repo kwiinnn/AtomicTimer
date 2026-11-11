@@ -36,6 +36,15 @@ export const en = {
   'manual.label': 'Enter time',
   'manual.help': 'e.g. 12.34, 1:02.42, 1234, 12.34+ or DNF — press Enter',
   'manual.invalid': 'That is not a valid time',
+  'undo.action': 'Undo',
+  'undo.solveDeleted': 'Solve deleted',
+  'times.empty': 'No solves yet — press and hold Space (or touch and hold) to start.',
+  'times.label': 'Solves',
+  'sheet.scramble': 'Scramble',
+  'sheet.comment': 'Comment',
+  'sheet.addComment': 'Add comment',
+  'sheet.editComment': 'Edit comment',
+  'sheet.delete': 'Delete',
 } as const;
 
 export type MessageKey = keyof typeof en;

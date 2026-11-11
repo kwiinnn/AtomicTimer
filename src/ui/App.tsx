@@ -13,6 +13,8 @@ import { Shell } from './layout/Shell';
 import { AppProvider, useApp } from './state/AppContext';
 import { makeTheme } from './theme/makeTheme';
 import { TimerPane } from './timer/TimerPane';
+import { TimesList } from './times/TimesList';
+import { UndoProvider } from './components/UndoSnackbar';
 
 const storage = createDexieStorage();
 const scrambles = createScrambleService();
@@ -26,11 +28,13 @@ function Themed() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' } }} />
-      <Shell
-        timer={<TimerPane />}
-        times={<Box data-testid="times-list" sx={{ p: 2 }} />}
-        stats={<Box data-testid="stats-pane" sx={{ p: 2 }} />}
-      />
+      <UndoProvider>
+        <Shell
+          timer={<TimerPane />}
+          times={<TimesList />}
+          stats={<Box data-testid="stats-pane" sx={{ p: 2 }} />}
+        />
+      </UndoProvider>
     </ThemeProvider>
   );
 }

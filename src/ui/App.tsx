@@ -2,6 +2,7 @@ import '@fontsource/quicksand/500.css';
 import '@fontsource/quicksand/700.css';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
+import GlobalStyles from '@mui/material/GlobalStyles';
 import { ThemeProvider } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useMemo } from 'react';
@@ -11,6 +12,7 @@ import { t } from './i18n';
 import { Shell } from './layout/Shell';
 import { AppProvider, useApp } from './state/AppContext';
 import { makeTheme } from './theme/makeTheme';
+import { TimerPane } from './timer/TimerPane';
 
 const storage = createDexieStorage();
 const scrambles = createScrambleService();
@@ -23,8 +25,9 @@ function Themed() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' } }} />
       <Shell
-        timer={<Box data-testid="timer-display" sx={{ m: 'auto', fontSize: 64 }}>0.00</Box>}
+        timer={<TimerPane />}
         times={<Box data-testid="times-list" sx={{ p: 2 }} />}
         stats={<Box data-testid="stats-pane" sx={{ p: 2 }} />}
       />

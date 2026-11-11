@@ -23,6 +23,19 @@ export const en = {
   'common.delete': 'Delete',
   'common.close': 'Close',
   'common.loading': 'Loading…',
+  'scramble.generating': 'Generating scramble…',
+  'scramble.failed': 'Could not generate a scramble — tap to retry',
+  'scramble.next': 'Tap for next scramble',
+  'scramble.enlarge': 'Scramble',
+  'quick.plus2': '+2',
+  'quick.dnf': 'DNF',
+  'quick.comment': 'Comment',
+  'quick.delete': 'Delete solve',
+  'comment.title': 'Comment',
+  'comment.label': 'Comment',
+  'manual.label': 'Enter time',
+  'manual.help': 'e.g. 12.34, 1:02.42, 1234, 12.34+ or DNF — press Enter',
+  'manual.invalid': 'That is not a valid time',
 } as const;
 
 export type MessageKey = keyof typeof en;

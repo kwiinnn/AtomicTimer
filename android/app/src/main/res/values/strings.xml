@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Atomic Timer</string>
+    <string name="title_activity_main">Atomic Timer</string>
+    <string name="package_name">com.kwiinnn.atomictimer</string>
+    <string name="custom_url_scheme">com.kwiinnn.atomictimer</string>
+</resources>

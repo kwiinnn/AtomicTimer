@@ -1,7 +1,13 @@
-// Web implementation; the native (Capacitor) branch is added in the Capacitor task.
+import { Capacitor } from '@capacitor/core';
 
-/** Offers `text` to the user as a downloaded file. */
+/** Offers `text` to the user as a file: a download on the web, the share sheet in the native apps. */
 export async function saveTextFile(name: string, text: string, mime: string): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    const [{ Filesystem, Directory, Encoding }, { Share }] = await Promise.all([import('@capacitor/filesystem'), import('@capacitor/share')]);
+    const { uri } = await Filesystem.writeFile({ path: name, data: text, directory: Directory.Cache, encoding: Encoding.UTF8 });
+    await Share.share({ title: name, files: [uri] });
+    return;
+  }
   const url = URL.createObjectURL(new Blob([text], { type: mime }));
   try {
     const a = document.createElement('a');

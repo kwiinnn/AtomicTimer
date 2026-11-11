@@ -7,3 +7,4 @@ playwright-report
 .superpowers/
 tests/fixtures/private/
 .env*
+*.tsbuildinfo

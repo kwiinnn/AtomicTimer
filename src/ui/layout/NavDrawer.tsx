@@ -16,7 +16,7 @@ import { useApp, type View } from '../state/AppContext';
 import { PALETTES } from '../theme/palettes';
 
 /** Views and dialogs that exist so far; later features register here. */
-export const ENABLED_NAV = new Set<string>(['timer']);
+export const ENABLED_NAV = new Set<string>(['timer', 'theme', 'settings', 'about']);
 
 export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { view, setView, setThemeDialogOpen, settings } = useApp();

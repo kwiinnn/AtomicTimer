@@ -16,12 +16,16 @@ import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
 import { StatsPane } from './stats/StatsPane';
 import { E2EHooks } from './state/E2EHooks';
+import { SettingsPage } from './settings/SettingsPage';
+import { ThemeDialog } from './settings/ThemeDialog';
+import { AboutPage } from './about/AboutPage';
 
 const storage = createDexieStorage();
 const scrambles = createScrambleService();
 
 function Themed() {
-  const { settings } = useApp();
+  const { settings, view } = useApp();
+  const page = view === 'settings' ? <SettingsPage /> : view === 'about' ? <AboutPage /> : undefined;
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
   const mode = settings.themeMode === 'system' ? (systemDark ? 'dark' : 'light') : settings.themeMode;
   const theme = useMemo(() => makeTheme(mode, settings.palette), [mode, settings.palette]);
@@ -35,7 +39,9 @@ function Themed() {
           timer={<TimerPane />}
           times={<TimesList />}
           stats={<StatsPane />}
+          page={page}
         />
+        <ThemeDialog />
       </UndoProvider>
     </ThemeProvider>
   );

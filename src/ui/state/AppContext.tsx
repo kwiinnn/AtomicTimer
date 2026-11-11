@@ -52,7 +52,11 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
   children: ReactNode;
   fallback?: ReactNode;
 }) {
-  const settings = useLiveQuery(() => storage.getSettings(), [storage]);
+  const stored = useLiveQuery(() => storage.getSettings(), [storage]);
+  // Local copy after the first change, so controls update instantly; every write is also persisted.
+  const [local, setLocal] = useState<Settings | null>(null);
+  const latest = useRef<Settings | null>(null);
+  const settings = local ?? stored;
   const sessions = useLiveQuery(() => storage.listSessions(), [storage]);
   const [timerBusy, setTimerBusy] = useState(false);
   const [view, setView] = useState<View>('timer');
@@ -66,8 +70,11 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
 
   const updateSettings = useCallback(
     async (patch: Partial<Settings>) => {
-      const current = await storage.getSettings();
-      await storage.putSettings({ ...current, ...patch });
+      const base = latest.current ?? (await storage.getSettings());
+      const next = { ...base, ...patch };
+      latest.current = next;
+      setLocal(next);
+      await storage.putSettings(next);
     },
     [storage],
   );

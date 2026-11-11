@@ -19,13 +19,15 @@ import { E2EHooks } from './state/E2EHooks';
 import { SettingsPage } from './settings/SettingsPage';
 import { ThemeDialog } from './settings/ThemeDialog';
 import { AboutPage } from './about/AboutPage';
+import { ImportExportPage } from './io/ImportExportPage';
+import { BackupReminder } from './io/BackupReminder';
 
 const storage = createDexieStorage();
 const scrambles = createScrambleService();
 
 function Themed() {
   const { settings, view } = useApp();
-  const page = view === 'settings' ? <SettingsPage /> : view === 'about' ? <AboutPage /> : undefined;
+  const page = view === 'settings' ? <SettingsPage /> : view === 'about' ? <AboutPage /> : view === 'io' ? <ImportExportPage /> : undefined;
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
   const mode = settings.themeMode === 'system' ? (systemDark ? 'dark' : 'light') : settings.themeMode;
   const theme = useMemo(() => makeTheme(mode, settings.palette), [mode, settings.palette]);
@@ -42,6 +44,7 @@ function Themed() {
           page={page}
         />
         <ThemeDialog />
+        <BackupReminder />
       </UndoProvider>
     </ThemeProvider>
   );

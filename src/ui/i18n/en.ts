@@ -1,0 +1,28 @@
+export const en = {
+  appName: 'Atomic Timer',
+  'tab.timer': 'Timer',
+  'tab.times': 'Times',
+  'tab.stats': 'Stats',
+  'nav.timer': 'Timer',
+  'nav.theme': 'Theme',
+  'nav.io': 'Import / Export',
+  'nav.settings': 'Settings',
+  'nav.about': 'About',
+  'nav.open': 'Open menu',
+  'session.default': 'Session 1',
+  'session.new': 'New session',
+  'session.rename': 'Rename session',
+  'session.delete': 'Delete session',
+  'session.deleteConfirm': 'Delete session “{name}” and its {count} solves? This cannot be undone.',
+  'session.name': 'Name',
+  'session.puzzle': 'Puzzle',
+  'puzzle.choose': 'Choose puzzle',
+  'common.create': 'Create',
+  'common.save': 'Save',
+  'common.cancel': 'Cancel',
+  'common.delete': 'Delete',
+  'common.close': 'Close',
+  'common.loading': 'Loading…',
+} as const;
+
+export type MessageKey = keyof typeof en;

@@ -27,6 +27,20 @@ describe('without inspection', () => {
     expect(r.state).toEqual({ kind: 'running', startedAt: 350, penalty: 'none' });
     expect(r.effects).toEqual([{ type: 'started', at: 350 }]);
   });
+  test('holdMs 0 releases start immediately', () => {
+    const r = run([ev('press', 0), ev('release', 10)], { holdMs: 0, inspection: false });
+    expect(r.state).toEqual({ kind: 'running', startedAt: 10, penalty: 'none' });
+  });
+  test('a late tick cannot turn a short press into a start (busy main thread)', () => {
+    // keydown@0 and keyup@100 were queued behind a long task; the first tick runs at 350.
+    const r = run([ev('press', 0), ev('tick', 350), ev('release', 100)], plain);
+    expect(r.state).toEqual({ kind: 'idle' });
+    expect(r.effects).toEqual([]);
+  });
+  test('a late tick during inspection falls back to inspecting', () => {
+    const r = run([ev('release', 0), ev('press', 3000), ev('tick', 3400), ev('release', 3100)], insp);
+    expect(r.state.kind).toBe('inspecting');
+  });
   test('tick before hold time stays holding', () => {
     expect(run([ev('press', 0), ev('tick', 299)], plain).state.kind).toBe('holding');
   });

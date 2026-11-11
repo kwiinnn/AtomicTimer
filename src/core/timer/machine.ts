@@ -6,7 +6,7 @@ export type TimerState =
   | { kind: 'idle' }
   | { kind: 'inspecting'; insp: NonNullable<Insp> }
   | { kind: 'holding'; since: number; insp: Insp }
-  | { kind: 'ready'; insp: Insp }
+  | { kind: 'ready'; since: number; insp: Insp }
   | { kind: 'running'; startedAt: number; penalty: Penalty }
   | { kind: 'stopped'; timeMs: number; penalty: Penalty };
 
@@ -71,7 +71,7 @@ export function step(s: TimerState, e: TimerEvent, cfg: TimerConfig): Result {
   }
 
   const startHold = (insp: Insp): TimerState =>
-    cfg.holdMs <= 0 ? { kind: 'ready', insp } : { kind: 'holding', since: e.at, insp };
+    cfg.holdMs <= 0 ? { kind: 'ready', since: e.at, insp } : { kind: 'holding', since: e.at, insp };
 
   switch (s.kind) {
     case 'idle':
@@ -92,12 +92,14 @@ export function step(s: TimerState, e: TimerEvent, cfg: TimerConfig): Result {
         const r = inspectionTick(s, e.at);
         if (r && r.state.kind === 'stopped') return r;
         const cur = (r?.state ?? s) as Extract<TimerState, { kind: 'holding' }>;
-        if (e.at - s.since >= cfg.holdMs) return { state: { kind: 'ready', insp: cur.insp }, effects: r?.effects ?? [] };
+        if (e.at - s.since >= cfg.holdMs) return { state: { kind: 'ready', since: s.since, insp: cur.insp }, effects: r?.effects ?? [] };
         return r ?? stay(s);
       }
       return stay(s);
 
     case 'ready':
+      // Judge the hold by the release's own timestamp: a late tick must not promote a short press.
+      if (e.type === 'release' && e.at - s.since < cfg.holdMs) return stay(unhold(s.insp));
       if (e.type === 'release') {
         const late = s.insp !== null && e.at - s.insp.startedAt > INSPECTION.plus2AfterMs;
         const penalty: Penalty = late ? 'plus2' : 'none';

@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { Penalty, Solve } from '../../core/model';
 import { formatSolve, formatTime } from '../../core/time';
 import { INSPECTION, type TimerState } from '../../core/timer/machine';
@@ -38,7 +38,7 @@ function inspectionText(startedAt: number, now: number): string {
   return now - startedAt <= INSPECTION.dnfAfterMs ? '+2' : 'DNF';
 }
 
-export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => void }) {
+export function TimerPane({ onSolveDeleted, tools }: { onSolveDeleted?: (s: Solve) => void; tools?: ReactNode }) {
   const { session, settings, storage, scrambles, solves, setTimerBusy, openPuzzlePicker, openSessionPicker } = useApp();
   const recorder = useMemo(
     () => createSolveRecorder({ scrambles, save: s => storage.putSolve(s), newId, now }),
@@ -173,8 +173,11 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
           )}
         </Box>
       </Box>
-      <Box className="hide-while-timing" data-no-timer sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-        {scramble && <ScrambleImage puzzle={puzzle} scramble={scramble} height={110} onClick={() => setEnlarged(true)} />}
+      <Box className="hide-while-timing" sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 2, p: 1 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>{tools}</Box>
+        <Box data-no-timer>
+          {scramble && <ScrambleImage puzzle={puzzle} scramble={scramble} height={tools ? 150 : 110} onClick={() => setEnlarged(true)} />}
+        </Box>
       </Box>
       <Snackbar open={!!unsaved} message={t('save.failed')} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         action={<Button color="secondary" size="small" onClick={() => {

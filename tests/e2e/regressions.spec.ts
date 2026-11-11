@@ -40,7 +40,7 @@ test('I-1: keys typed into an open menu or select do not hit the last solve or t
   await page.keyboard.press('Escape');
   await expect(page.getByRole('menu')).toHaveCount(0);
   await expect(page.getByTestId('timer-display')).toHaveAttribute('data-state', 'idle');
-  await expect(page.getByTestId('solve-row').first()).not.toHaveText(/DNF|\+$/);
+  await expect(page.getByTestId('solve-row').first()).not.toHaveText(/DNF|\d\+/);
   await expect(page.getByTestId('timer-pane')).toHaveAttribute('data-solve-count', '1');
 });
 

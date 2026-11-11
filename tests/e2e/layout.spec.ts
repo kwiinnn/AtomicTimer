@@ -37,3 +37,39 @@ test('after a short tap the focus view is not shown', async ({ page }) => {
   await expect(page.getByTestId('timer-display')).toHaveAttribute('data-focus', 'false');
   await expect(page.getByTestId('timer-pane')).toHaveAttribute('data-solve-count', '0');
 });
+
+test.describe('desktop', () => {
+  test.skip(({ isMobile }) => isMobile, 'desktop layout');
+
+  test('records sidebar is on the left, timer on the right', async ({ page }) => {
+    await ready(page);
+    const aside = (await page.locator('aside').boundingBox())!;
+    const main = (await page.locator('main').first().boundingBox())!;
+    expect(aside.x).toBeLessThan(main.x);
+    expect(aside.x).toBeLessThan(5);
+    // Stats summary sits above the times list.
+    const stats = (await page.getByTestId('stats-summary').boundingBox())!;
+    const list = (await page.getByTestId('times-list').boundingBox())!;
+    expect(stats.y).toBeLessThan(list.y);
+  });
+
+  test('times table shows rolling ao5 / ao12 per solve', async ({ page }) => {
+    await page.goto('/?e2e=1');
+    await page.waitForFunction(() => typeof window.__seed === 'function');
+    await page.evaluate(() => window.__seed!(Array.from({ length: 12 }, (_, i) => (i + 1) * 1000)));
+    const newest = page.getByTestId('solve-row').first();
+    await expect(newest).toContainText('12.00');
+    await expect(newest.getByTestId('row-ao5')).toHaveText('10.00');
+    await expect(newest.getByTestId('row-ao12')).toHaveText('6.50');
+    await expect(page.getByTestId('solve-row').nth(8).getByTestId('row-ao5')).toHaveText('–');
+  });
+
+  test('graph lives in a tool panel under the timer', async ({ page }) => {
+    await page.goto('/?e2e=1');
+    await page.waitForFunction(() => typeof window.__seed === 'function');
+    await page.evaluate(() => window.__seed!([5000, 6000, 7000]));
+    const graph = page.locator('main').getByTestId('time-graph');
+    await expect(graph).toBeVisible();
+    await expect(page.locator('aside').getByTestId('time-graph')).toHaveCount(0);
+  });
+});

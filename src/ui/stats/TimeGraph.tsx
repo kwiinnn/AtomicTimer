@@ -16,7 +16,7 @@ const SERIES = {
 const finiteOrNull = (v: number | null) => (v === null || !Number.isFinite(v) ? null : v / 1000);
 
 /** Solve history with ao5 / ao12. DNFs and not-yet-defined averages are gaps. */
-export function TimeGraph({ stats, discrete, thousandths }: { stats: SessionStats; discrete: boolean; thousandths: boolean }) {
+export function TimeGraph({ stats, discrete, thousandths, height = 220 }: { stats: SessionStats; discrete: boolean; thousandths: boolean; height?: number }) {
   const host = useRef<HTMLDivElement>(null);
   const theme = useTheme();
   const mode = theme.palette.mode;
@@ -53,7 +53,7 @@ export function TimeGraph({ stats, discrete, thousandths }: { stats: SessionStat
     const plot = new uPlot(
       {
         width: el.clientWidth || 320,
-        height: 220,
+        height,
         cursor: { points: { size: 8 } },
         legend: { show: true, live: true },
         scales: { x: { time: false } },
@@ -68,13 +68,13 @@ export function TimeGraph({ stats, discrete, thousandths }: { stats: SessionStat
       data,
       el,
     );
-    const ro = new ResizeObserver(() => plot.setSize({ width: el.clientWidth || 320, height: 220 }));
+    const ro = new ResizeObserver(() => plot.setSize({ width: el.clientWidth || 320, height }));
     ro.observe(el);
     return () => {
       ro.disconnect();
       plot.destroy();
     };
-  }, [stats, discrete, thousandths, mode, theme.palette.text.secondary, theme.palette.divider]);
+  }, [stats, discrete, thousandths, height, mode, theme.palette.text.secondary, theme.palette.divider]);
 
   return (
     <Box data-testid="time-graph" ref={host} role="img" aria-label={t('stats.graph')}

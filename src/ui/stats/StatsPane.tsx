@@ -6,6 +6,7 @@ import Collapse from '@mui/material/Collapse';
 import Typography from '@mui/material/Typography';
 import { useMemo, useState } from 'react';
 import { computeSessionStats, filterToday } from '../../core/stats/session';
+import { useSessionStats } from './useSessionStats';
 import { t } from '../i18n';
 import { useApp } from '../state/AppContext';
 import { StatsTable } from './StatsTable';
@@ -20,10 +21,11 @@ const readGraphOpen = () => {
   }
 };
 
-export function StatsPane() {
+/** Session (and optional today) tables, plus the graph unless `graph` is false (desktop shows it under the timer). */
+export function StatsPane({ graph = true }: { graph?: boolean }) {
   const { solves, settings } = useApp();
   const { trimPct, dnfRule, thousandths } = settings;
-  const stats = useMemo(() => computeSessionStats(solves, { trimPct, dnfRule }), [solves, trimPct, dnfRule]);
+  const stats = useSessionStats();
   const [today] = useState(() => new Date());
   const todayStats = useMemo(
     () => (settings.showTodayStats ? computeSessionStats(filterToday(solves, today), { trimPct, dnfRule }) : null),
@@ -46,12 +48,14 @@ export function StatsPane() {
       {solves.length === 0 && <Typography color="text.secondary" sx={{ p: 2 }}>{t('stats.empty')}</Typography>}
       {settings.showSessionStats && <StatsTable stats={stats} title={t('stats.session')} thousandths={thousandths} />}
       {todayStats && <StatsTable stats={todayStats} title={t('stats.today')} thousandths={thousandths} idPrefix="today" />}
+      {graph && (<>
       <Button size="small" onClick={toggleGraph} endIcon={graphOpen ? <ExpandLess /> : <ExpandMore />} sx={{ ml: 1 }}>
         {t('stats.graph')}
       </Button>
       <Collapse in={graphOpen} unmountOnExit>
         <TimeGraph stats={stats} discrete={settings.discreteGraph} thousandths={thousandths} />
       </Collapse>
+      </>)}
     </Box>
   );
 }

@@ -27,7 +27,7 @@ test('stats table for 12 ascending solves', async ({ page, isMobile }) => {
 test('a DNF inside the window is trimmed', async ({ page, isMobile }) => {
   await seed(page, Array.from({ length: 12 }, (_, i) => (i + 1) * 1000));
   await showTimes(page, isMobile);
-  await page.getByTestId('solve-row').filter({ hasText: /^10\.00$|10\.00$/ }).first().click();
+  await page.getByTestId('solve-row').nth(2).click(); // newest first: #12, #11, #10
   await page.getByTestId('solve-sheet').getByRole('button', { name: 'DNF' }).click();
   await page.keyboard.press('Escape');
   await showStats(page, isMobile);

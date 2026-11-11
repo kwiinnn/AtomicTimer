@@ -15,6 +15,8 @@ import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
 import { StatsPane } from './stats/StatsPane';
+import { GraphPanel } from './stats/GraphPanel';
+import { DESKTOP_QUERY } from './layout/Shell';
 import { E2EHooks } from './state/E2EHooks';
 import { SettingsPage } from './settings/SettingsPage';
 import { ThemeDialog } from './settings/ThemeDialog';
@@ -30,6 +32,7 @@ function Themed() {
   const { settings, view } = useApp();
   const page = view === 'settings' ? <SettingsPage /> : view === 'about' ? <AboutPage /> : view === 'io' ? <ImportExportPage /> : undefined;
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
+  const desktop = useMediaQuery(DESKTOP_QUERY, { noSsr: true });
   const mode = settings.themeMode === 'system' ? (systemDark ? 'dark' : 'light') : settings.themeMode;
   const theme = useMemo(() => makeTheme(mode, settings.palette), [mode, settings.palette]);
   return (
@@ -39,9 +42,9 @@ function Themed() {
       <E2EHooks />
       <UndoProvider>
         <Shell
-          timer={<TimerPane />}
+          timer={<TimerPane tools={desktop ? <GraphPanel /> : undefined} />}
           times={<TimesList />}
-          stats={<StatsPane />}
+          stats={<StatsPane graph={!desktop} />}
           page={page}
         />
         <ThemeDialog />

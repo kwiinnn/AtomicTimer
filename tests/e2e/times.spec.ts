@@ -7,11 +7,11 @@ test('penalty toggle shows in the list', async ({ page, isMobile }) => {
   await keyboardSolve(page);
   await page.getByTestId('quick-plus2').click();
   await showTimes(page, isMobile);
-  await expect(page.getByTestId('solve-row').first()).toHaveText(/\+$/);
+  await expect(page.getByTestId('solve-row').first()).toHaveText(/\d\+/);
   await showTimer(page, isMobile);
   await page.getByTestId('quick-plus2').click();
   await showTimes(page, isMobile);
-  await expect(page.getByTestId('solve-row').first()).not.toHaveText(/\+$/);
+  await expect(page.getByTestId('solve-row').first()).not.toHaveText(/\d\+/);
 });
 
 test('delete and undo', async ({ page, isMobile }) => {

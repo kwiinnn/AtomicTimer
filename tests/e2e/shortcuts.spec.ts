@@ -8,7 +8,7 @@ test('2 toggles +2 on the last solve', async ({ page, isMobile }) => {
   await keyboardSolve(page);
   await page.keyboard.press('2');
   await showTimes(page, isMobile);
-  await expect(page.getByTestId('solve-row').first()).toHaveText(/\+$/);
+  await expect(page.getByTestId('solve-row').first()).toHaveText(/\d\+/);
 });
 test('D toggles DNF', async ({ page }) => {
   await keyboardSolve(page);
@@ -32,7 +32,7 @@ test('C opens the comment dialog and typing there does not trigger shortcuts', a
   await page.keyboard.press('c');
   await page.getByRole('textbox', { name: 'Comment' }).pressSequentially('2 dnf');
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByTestId('solve-row').first()).not.toHaveText(/DNF|\+$/);
+  await expect(page.getByTestId('solve-row').first()).not.toHaveText(/DNF|\d\+/);
 });
 test('P and S open the pickers; ? shows the overlay', async ({ page }) => {
   await page.keyboard.press('p');

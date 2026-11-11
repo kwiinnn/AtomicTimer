@@ -19,6 +19,7 @@ import { ManualEntry } from './ManualEntry';
 import { QuickActions, useSolveActions } from './QuickActions';
 import { ScrambleBox } from './ScrambleBox';
 import { createSolveRecorder, SaveError } from './solveRecorder';
+import { shortcutTarget } from './lastSolve';
 import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import { TimerDisplay } from './TimerDisplay';
@@ -124,7 +125,7 @@ export function TimerPane({ onSolveDeleted }: { onSolveDeleted?: (s: Solve) => v
   const [commentFor, setCommentFor] = useState<Solve | null>(null);
   const { togglePenalty, remove } = useSolveActions();
   const { showUndo } = useUndo();
-  const newest = solves.at(-1);
+  const newest = shortcutTarget(solves, mine);
   useShortcuts(
     {
       plus2: () => newest && void togglePenalty(newest, 'plus2'),

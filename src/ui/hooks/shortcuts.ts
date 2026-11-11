@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { isTypingTarget } from './keyboard';
+import { inputBlocked } from './keyboard';
 
 export type ShortcutAction = 'plus2' | 'dnf' | 'comment' | 'deleteLast' | 'nextScramble' | 'puzzlePicker' | 'sessionPicker' | 'help';
 
@@ -18,7 +18,7 @@ export interface ShortcutInput {
 }
 
 export function keyToShortcut(e: ShortcutInput, timerBusy: boolean): ShortcutAction | null {
-  if (timerBusy || e.repeat || e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e.target)) return null;
+  if (timerBusy || e.repeat || e.ctrlKey || e.metaKey || e.altKey || inputBlocked(e.target)) return null;
   return KEYS[e.key.toLowerCase()] ?? null;
 }
 

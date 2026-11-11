@@ -4,6 +4,8 @@ import { keyboardSolve, ready } from './helpers/solve';
 async function nav(page: Page, item: string) {
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('navigation').getByRole('button', { name: item }).click();
+  // Keys are ignored while the drawer is still animating closed.
+  await expect(page.getByRole('navigation')).toHaveCount(0);
 }
 
 test.beforeEach(async ({ page }) => ready(page));

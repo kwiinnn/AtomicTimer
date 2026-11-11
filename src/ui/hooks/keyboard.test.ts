@@ -22,3 +22,17 @@ test('body, buttons and null are not typing targets', () => {
   expect(isTypingTarget(document.createElement('button'))).toBe(false);
   expect(isTypingTarget(null)).toBe(false);
 });
+
+test('keys inside an open MUI menu, popover or modal are blocked; a closing one (focus restored) is not', async () => {
+  const { inputBlocked } = await import('./keyboard');
+  for (const cls of ['MuiModal-root', 'MuiPopover-root']) {
+    const overlay = document.createElement('div');
+    overlay.className = cls;
+    const item = document.createElement('li');
+    overlay.append(item);
+    document.body.append(overlay);
+    expect(inputBlocked(item), cls).toBe(true);
+    expect(inputBlocked(document.body), `${cls} fading out, focus back on body`).toBe(false);
+    overlay.remove();
+  }
+});

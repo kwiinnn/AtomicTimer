@@ -25,3 +25,13 @@ test('modifier chords are left to the browser', () => {
 test('typing targets ignored', () => {
   expect(keyToShortcut(k('d', { target: document.createElement('textarea') }), false)).toBeNull();
 });
+
+test('shortcuts are ignored while a menu is open', () => {
+  const overlay = document.createElement('div');
+  overlay.className = 'MuiPopover-root';
+  const item = document.createElement('li');
+  overlay.append(item);
+  document.body.append(overlay);
+  expect(keyToShortcut(k('d', { target: item }), false)).toBeNull();
+  overlay.remove();
+});

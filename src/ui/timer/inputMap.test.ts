@@ -55,3 +55,42 @@ describe('pointer', () => {
     expect(pointerToTimerEvent({ type: 'pointerdown', isPrimary: true, button: 0, target: document.createElement('button') }, 0)).toBeNull();
   });
 });
+
+describe('pointer gate (only releases that follow an accepted press)', () => {
+  const pane = document.createElement('div');
+  const inside = document.createElement('div');
+  const button = document.createElement('button');
+  pane.append(inside, button);
+  const outside = document.createElement('div');
+  const ev = (type: 'pointerdown' | 'pointerup', target: Element) => ({ type, isPrimary: true, button: 0, target });
+
+  test('a tap on a button inside the pane never reaches the timer', async () => {
+    const { createPointerGate } = await import('./inputMap');
+    const gate = createPointerGate();
+    expect(gate(ev('pointerdown', button), pane, 1)).toBeNull();
+    expect(gate(ev('pointerup', button), pane, 2)).toBeNull();
+  });
+  test('portal-bubbled events from outside the pane are ignored', async () => {
+    const { createPointerGate } = await import('./inputMap');
+    const gate = createPointerGate();
+    expect(gate(ev('pointerdown', outside), pane, 1)).toBeNull();
+    expect(gate(ev('pointerup', outside), pane, 2)).toBeNull();
+  });
+  test('press then release on the pane goes through, once', async () => {
+    const { createPointerGate } = await import('./inputMap');
+    const gate = createPointerGate();
+    expect(gate(ev('pointerdown', inside), pane, 1)).toEqual({ type: 'press', at: 1 });
+    expect(gate(ev('pointerup', inside), pane, 2)).toEqual({ type: 'release', at: 2 });
+    expect(gate(ev('pointerup', inside), pane, 3)).toBeNull();
+  });
+});
+
+test('keys are ignored while an overlay (menu/select popover) is open', () => {
+  const overlay = document.createElement('div');
+  overlay.className = 'MuiPopover-root';
+  document.body.append(overlay);
+  const item = document.createElement('li');
+  overlay.append(item);
+  expect(keyToTimerEvent(key('keydown', ' ', { target: item }), idle, 0)).toBeNull();
+  overlay.remove();
+});

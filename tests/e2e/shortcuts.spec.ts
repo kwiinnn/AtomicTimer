@@ -38,11 +38,11 @@ test('P and S open the pickers; ? shows the overlay', async ({ page }) => {
   await page.keyboard.press('p');
   await expect(page.getByRole('listbox', { name: 'Choose puzzle' })).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
   await page.keyboard.press('s');
   await expect(page.getByRole('menuitem', { name: 'New session' })).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('menu')).toHaveCount(0);
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
   await page.keyboard.press('?');
   await expect(page.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
 });

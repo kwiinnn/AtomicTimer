@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Penalty } from '../../core/model';
 import { initialTimerState, step, type TimerConfig, type TimerEvent, type TimerState } from '../../core/timer/machine';
-import { keyToTimerEvent, pointerToTimerEvent } from './inputMap';
+import { inputBlocked } from '../hooks/keyboard';
+import { createPointerGate, keyToTimerEvent } from './inputMap';
 
 export interface TimerHandlers {
   onStarted(): void;
@@ -22,6 +23,7 @@ export function useTimer(cfg: TimerConfig, handlers: TimerHandlers, enabled: boo
   const cfgRef = useRef(cfg);
   const handlersRef = useRef(handlers);
   const inputRef = useRef<'keyboard' | 'touch'>('keyboard');
+  const [gate] = useState(createPointerGate);
   useEffect(() => {
     cfgRef.current = cfg;
     handlersRef.current = handlers;
@@ -51,8 +53,9 @@ export function useTimer(cfg: TimerConfig, handlers: TimerHandlers, enabled: boo
         stateRef.current,
         stamp(e),
       );
-      // Space must never scroll the page or click a focused button, even when held (repeat).
-      if (e.key === ' ' && !(e.target instanceof Element && e.target.closest('input, textarea, [role="dialog"]'))) e.preventDefault();
+      // Space must never scroll the page or click a focused button, even when held (repeat) —
+      // except inside text fields and open menus/dialogs, where it keeps its normal meaning.
+      if (e.key === ' ' && !inputBlocked(e.target)) e.preventDefault();
       if (!ev) return;
       if (ev.type === 'cancel' && (stateRef.current.kind === 'idle' || stateRef.current.kind === 'stopped')) return;
       e.preventDefault();
@@ -90,15 +93,24 @@ export function useTimer(cfg: TimerConfig, handlers: TimerHandlers, enabled: boo
   const onPointer = useCallback(
     (e: ReactPointerEvent) => {
       if (!enabled) return;
-      const ev = pointerToTimerEvent(
+      const ev = gate(
         { type: e.type as 'pointerdown' | 'pointerup' | 'pointercancel', isPrimary: e.isPrimary, button: e.button, target: e.target },
+        e.currentTarget,
         stamp(e),
       );
       if (!ev) return;
-      if (ev.type === 'press') inputRef.current = 'touch';
+      if (ev.type === 'press') {
+        inputRef.current = 'touch';
+        // Keep receiving this pointer even if it slides off the pane, so the release is never lost.
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          // synthetic events have no capturable pointer
+        }
+      }
       dispatch(ev);
     },
-    [enabled, dispatch],
+    [enabled, dispatch, gate],
   );
 
   return {

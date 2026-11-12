@@ -148,6 +148,12 @@ async function glassPhoneWithSolves(page: Page) {
   await expect(page.locator('.MuiModal-root')).toHaveCount(0);
 }
 
+test('in glass, the quick stats card has room between labels and numbers', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await glassPhoneWithSolves(page);
+  expect((await page.getByTestId('quick-stats').boundingBox())!.width).toBeGreaterThanOrEqual(150);
+});
+
 test('in glass, phone stats sections sit on frosted cards; time tiles get depth, not a card', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'phone layout only');
   await glassPhoneWithSolves(page);
@@ -159,7 +165,15 @@ test('in glass, phone stats sections sit on frosted cards; time tiles get depth,
   await expect(page.getByTestId('times-list').locator('.phone-card')).toHaveCount(0);
   const tile = page.getByTestId('solve-row').first();
   await expect(tile).toHaveCSS('box-shadow', /rgba\(0, 0, 0/);
+  await expect(tile).not.toHaveCSS('box-shadow', /inset/);
   await expect(tile).toHaveCSS('backdrop-filter', 'none');
+  // One thin, faint line all round.
+  const border = await tile.evaluate(el => {
+    const cs = getComputedStyle(el);
+    return { widths: [cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth], color: cs.borderTopColor };
+  });
+  expect(border.widths).toEqual(['1px', '1px', '1px', '1px']);
+  expect(Number(border.color.match(/[\d.]+/g)![3])).toBeLessThanOrEqual(0.25);
 });
 
 test('the phone stats graph is always shown, with no Graph toggle', async ({ page, isMobile }) => {

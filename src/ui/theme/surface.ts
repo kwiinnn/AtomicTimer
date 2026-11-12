@@ -82,7 +82,7 @@ export function phoneCardSx(padding: number | string = 0): (theme: Theme) => CSS
 
 /**
  * Glass time tiles: the theme colour blended into the paper, mostly solid so tiles look alike whatever part of
- * the photo is behind them while it still shows through; a little depth (light top edge, soft shadow) and no per-tile blur.
+ * the photo is behind them while it still shows through; a thin faint edge, a soft shadow and no per-tile blur.
  */
 export function tileDepthSx(theme: Theme): CSSObject {
   if (theme.uiStyle !== 'glass') return {};
@@ -90,7 +90,8 @@ export function tileDepthSx(theme: Theme): CSSObject {
   return {
     // 70% lets the photo show through; it is the lowest that keeps text readable on every palette over pure black/white.
     backgroundColor: alpha(mix(PAPER[r.mode], r.primary, r.mode === 'dark' ? 0.35 : 0.3), 0.7),
-    border: `1px solid ${alpha(lighten(r.primary, 0.4), 0.4)}`,
-    boxShadow: `0 4px 14px rgba(0, 0, 0, 0.28), inset 0 1px 0 ${alpha('#ffffff', 0.18)}`,
+    // One thin, faint line all round (no inner top highlight, which made the top edge look thicker).
+    border: `1px solid ${alpha(lighten(r.primary, 0.4), 0.22)}`,
+    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.28)',
   };
 }

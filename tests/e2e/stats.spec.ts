@@ -54,8 +54,17 @@ test('phone timer shows quick stats bottom-left', async ({ page, isMobile }) => 
   const vp = page.viewportSize()!;
   expect(box.x).toBeLessThan(vp.width / 2);
   expect(box.y + box.height).toBeGreaterThan(vp.height * 0.7);
-  // Not cramped: room between the labels and the numbers.
-  expect(box.width).toBeGreaterThanOrEqual(150);
+  // Outside Glass it stays a tight column (labels near their numbers).
+  // Measure the text itself (cells can be wider than their text).
+  const textBox = (el: Element) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const r = range.getBoundingClientRect();
+    return { left: r.left, right: r.right };
+  };
+  const label = await q.getByText('ao100', { exact: true }).evaluate(textBox);
+  const value = await q.getByTestId('quick-mean').evaluate(textBox); // widest number, right-aligned
+  expect(value.left - label.right).toBeLessThanOrEqual(24);
   // The phone scramble image keeps its phone size.
   expect((await page.getByTestId('scramble-image').boundingBox())!.height).toBeLessThanOrEqual(112);
 });

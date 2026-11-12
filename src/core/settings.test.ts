@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { DEFAULT_SETTINGS, migrateSettings } from './settings';
+import { APP_FONT_IDS, DEFAULT_SETTINGS, migrateSettings, TIMER_FONT_IDS } from './settings';
 
 test('defaults match the spec', () => {
   expect(DEFAULT_SETTINGS).toMatchObject({
@@ -51,4 +51,20 @@ test('background dim and timer font are range/enum checked', () => {
   expect(migrateSettings({ backgroundDim: 0.7 }).backgroundDim).toBe(0.7);
   expect(migrateSettings({ timerFont: 'lcd' }).timerFont).toBe('lcd');
   expect(migrateSettings({ timerFont: 'comic' }).timerFont).toBe('quicksand');
+});
+
+test('font defaults and catalogue', () => {
+  expect(DEFAULT_SETTINGS.appFont).toBe('quicksand');
+  expect(DEFAULT_SETTINGS.timerFont).toBe('quicksand');
+  expect(APP_FONT_IDS).not.toContain('lcd');
+  expect(APP_FONT_IDS).not.toContain('digital');
+  expect(TIMER_FONT_IDS).toContain('app');
+  expect(TIMER_FONT_IDS).toContain('lcd');
+});
+test('app font rejects display-only faces; timer accepts "same as app"', () => {
+  expect(migrateSettings({ appFont: 'newsreader' }).appFont).toBe('newsreader');
+  expect(migrateSettings({ appFont: 'lcd' }).appFont).toBe('quicksand');
+  expect(migrateSettings({ appFont: 'anthropic' }).appFont).toBe('quicksand');
+  expect(migrateSettings({ timerFont: 'app' }).timerFont).toBe('app');
+  expect(migrateSettings({ timerFont: 'sourceSerif' }).timerFont).toBe('sourceSerif');
 });

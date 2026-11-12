@@ -10,8 +10,25 @@ export const PALETTE_IDS: PaletteId[] = [
 /** A preset theme, or the user's own gradient (`customTheme`). */
 export type PaletteChoice = PaletteId | 'custom';
 export type ThemeMode = 'system' | 'light' | 'dark';
-export type TimerFontId = 'quicksand' | 'mono' | 'digital' | 'lcd' | 'system';
-export const TIMER_FONT_IDS: TimerFontId[] = ['quicksand', 'mono', 'digital', 'lcd', 'system'];
+/** Font catalogue (all OFL-1.1 except the system stack). 'mono' is JetBrains Mono. */
+export type FontId =
+  | 'quicksand' | 'inter' | 'nunito' | 'poppins' | 'dmSans' | 'plexSans' | 'spaceGrotesk'
+  | 'sourceSerif' | 'newsreader' | 'lora' | 'plexSerif' | 'fraunces'
+  | 'mono' | 'robotoMono' | 'plexMono'
+  | 'digital' | 'lcd'
+  | 'system';
+export const FONT_IDS: FontId[] = [
+  'quicksand', 'inter', 'nunito', 'poppins', 'dmSans', 'plexSans', 'spaceGrotesk',
+  'sourceSerif', 'newsreader', 'lora', 'plexSerif', 'fraunces',
+  'mono', 'robotoMono', 'plexMono',
+  'digital', 'lcd',
+  'system',
+];
+/** Display faces (Orbitron, 7-segment LCD) only suit digits, so they are timer-only. */
+export const APP_FONT_IDS: FontId[] = FONT_IDS.filter(id => id !== 'digital' && id !== 'lcd');
+/** A catalogue font, or 'app' to follow the app font. */
+export type TimerFontId = FontId | 'app';
+export const TIMER_FONT_IDS: TimerFontId[] = ['app', ...FONT_IDS];
 
 export interface CustomTheme {
   /** Gradient start and end colours, #rrggbb. */
@@ -45,6 +62,8 @@ export interface Settings {
   /** How much the theme colour dims the background image, 0–0.9. */
   backgroundDim: number;
   timerFont: TimerFontId;
+  /** Font for the whole interface. */
+  appFont: FontId;
   backupReminder: boolean;
   lastBackupAt: number | null;
   currentSessionId: string | null;
@@ -70,6 +89,7 @@ export const DEFAULT_SETTINGS: Settings = {
   backgroundImage: false,
   backgroundDim: 0.4,
   timerFont: 'quicksand',
+  appFont: 'quicksand',
   backupReminder: true,
   lastBackupAt: null,
   currentSessionId: null,
@@ -80,6 +100,7 @@ const ENUMS: Partial<Record<keyof Settings, readonly unknown[]>> = {
   themeMode: ['system', 'light', 'dark'],
   palette: [...PALETTE_IDS, 'custom'],
   timerFont: TIMER_FONT_IDS,
+  appFont: APP_FONT_IDS,
 };
 
 /** '#abc' / '#AABBCC' → '#aabbcc'; anything else → null. */

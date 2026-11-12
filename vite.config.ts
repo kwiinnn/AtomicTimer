@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { keepInPrecache } from './src/pwa/precacheFilter.ts';
 
 const PRIMARY = '#3f51b5';
 
@@ -30,6 +31,16 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,json,wasm}'],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         clientsClaim: false,
+        // Optional fonts are not precached (hundreds of subset files); see src/pwa/precacheFilter.ts.
+        manifestTransforms: [async entries => ({ manifest: entries.filter(e => keepInPrecache(e.url)), warnings: [] })],
+        runtimeCaching: [
+          {
+            // Fonts chosen in the Theme page: cached on first use so they keep working offline.
+            urlPattern: ({ request }) => request.destination === 'font',
+            handler: 'CacheFirst',
+            options: { cacheName: 'fonts', expiration: { maxEntries: 300, maxAgeSeconds: 365 * 24 * 3600 } },
+          },
+        ],
       },
     }),
   ],

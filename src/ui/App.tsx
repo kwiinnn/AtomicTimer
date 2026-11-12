@@ -14,7 +14,7 @@ import { makeTheme } from './theme/makeTheme';
 import { resolveTheme } from './theme/resolve';
 import { AppBackground, themeVars } from './theme/AppBackground';
 import { useBackgroundImageUrl } from './theme/useBackgroundImage';
-import { ensureTimerFont, TIMER_FONTS } from './theme/timerFonts';
+import { ensureFont, timerFamily } from './theme/fonts';
 import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
@@ -44,11 +44,11 @@ function Themed() {
   const theme = useMemo(() => makeTheme(resolved), [resolved]);
   const imageUrl = useBackgroundImageUrl();
   const image = imageUrl ? { url: imageUrl, dim: settings.backgroundDim } : null;
-  useEffect(() => ensureTimerFont(settings.timerFont), [settings.timerFont]);
+  useEffect(() => ensureFont(settings.timerFont), [settings.timerFont]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image, TIMER_FONTS[settings.timerFont].family) }} />
+      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image, timerFamily(settings.timerFont, settings.appFont)) }} />
       <AppBackground />
       <E2EHooks />
       <UndoProvider>

@@ -84,7 +84,7 @@ test('background image: upload, dim, persist, remove', async ({ page }) => {
 test('timer font choice applies to the timer and persists', async ({ page }) => {
   await ready(page);
   await openTheme(page);
-  await page.getByRole('radio', { name: /LCD/ }).check();
+  await page.getByRole('radiogroup', { name: 'Timer font' }).getByRole('radio', { name: /LCD/ }).check();
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
   await expect(page.getByTestId('timer-display')).toHaveCSS('font-family', /DSEG7 Classic/);
@@ -95,4 +95,17 @@ test('timer font choice applies to the timer and persists', async ({ page }) => 
   })).toBe(true);
   await page.reload();
   await expect(page.getByTestId('timer-display')).toHaveCSS('font-family', /DSEG7 Classic/);
+});
+
+test('any catalogue font can be the timer font', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('radiogroup', { name: 'Timer font' }).getByRole('radio', { name: 'Newsreader' }).check();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.getByTestId('timer-display')).toHaveCSS('font-family', /Newsreader/);
+  expect(await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.check('700 48px "Newsreader"');
+  })).toBe(true);
 });

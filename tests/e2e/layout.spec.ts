@@ -219,10 +219,11 @@ test('in glass, time tiles take the theme colour', async ({ page, isMobile }) =>
   test.skip(!isMobile, 'phone layout only');
   await glassPhoneWithSolves(page);
   await page.getByRole('tab', { name: 'Times' }).click();
-  // Mostly solid, so every tile looks the same whatever part of the photo is behind it…
+  // See-through enough to show the photo, solid enough that tiles look alike and stay readable…
   const colours = await page.getByTestId('solve-row').evaluateAll(els => els.map(el => getComputedStyle(el).backgroundColor));
   const [r, g, b, a = 1] = colours[0]!.match(/[\d.]+/g)!.map(Number);
-  expect(a).toBeGreaterThanOrEqual(0.85);
+  expect(a).toBeGreaterThanOrEqual(0.65);
+  expect(a).toBeLessThanOrEqual(0.75);
   // …and in the theme colour: default indigo is blue-dominant.
   expect(b!).toBeGreaterThan(r!);
   expect(b!).toBeGreaterThan(g!);

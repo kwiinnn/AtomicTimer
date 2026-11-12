@@ -12,6 +12,7 @@ import { DESKTOP_QUERY } from '../layout/Shell';
 import { useApp } from '../state/AppContext';
 import { SolveSheet } from './SolveSheet';
 import { useSessionStats } from '../stats/useSessionStats';
+import { phoneCardSx } from '../theme/surface';
 
 /** Rows rendered per page; more are added when the "show more" sentinel scrolls into view. */
 export const PAGE = 100;
@@ -96,7 +97,9 @@ export function TimesList() {
           <span style={{ textAlign: 'left' }}>#</span><span>{t('times.time')}</span><span>ao5</span><span>ao12</span>
         </Box>
       )}
-      <Box sx={{ display: 'grid', gap: desktop ? 0 : 0.75, gridTemplateColumns: desktop ? '1fr' : 'repeat(auto-fill, minmax(104px, 1fr))' }}>
+      <Box className={!desktop && visible.length > 0 ? 'phone-card' : undefined}
+        sx={[{ display: 'grid', gap: desktop ? 0 : 0.75, gridTemplateColumns: desktop ? '1fr' : 'repeat(auto-fill, minmax(104px, 1fr))' },
+          !desktop && visible.length > 0 && phoneCardSx(8)]}>
         {visible.map((s, i) => {
           const index = solves.length - 1 - i;
           return (

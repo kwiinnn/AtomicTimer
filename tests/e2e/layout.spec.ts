@@ -134,3 +134,36 @@ test('swiping away mid-scroll still updates the tab', async ({ page, isMobile })
   await page.locator('[role="tabpanel"]').first().locator('..').evaluate(el => el.scrollTo({ left: 0, behavior: 'instant' }));
   await expect(page.getByRole('tab', { name: 'Timer' })).toHaveAttribute('aria-selected', 'true');
 });
+
+async function glassPhoneWithSolves(page: Page) {
+  await page.goto('/?e2e=1');
+  await page.waitForFunction(() => typeof window.__seed === 'function');
+  await page.evaluate(() => window.__seed!([12000, 13000, 14000, 15000, 16000]));
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Theme' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+}
+
+test('in glass, phone stats sections and the times grid sit on frosted cards', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await glassPhoneWithSolves(page);
+  await page.getByRole('tab', { name: 'Stats' }).click();
+  const statsCards = page.getByTestId('stats-pane').locator('.phone-card');
+  await expect(statsCards).toHaveCount(2); // session table + graph
+  for (const card of await statsCards.all()) await expect(card).toHaveCSS('backdrop-filter', /blur\(20px\)/);
+  await page.getByRole('tab', { name: 'Times' }).click();
+  await expect(page.getByTestId('times-list').locator('.phone-card')).toHaveCSS('backdrop-filter', /blur\(20px\)/);
+});
+
+test('phone cards stay bare outside glass', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await page.goto('/?e2e=1');
+  await page.waitForFunction(() => typeof window.__seed === 'function');
+  await page.evaluate(() => window.__seed!([12000]));
+  await page.getByRole('tab', { name: 'Stats' }).click();
+  await expect(page.getByTestId('stats-pane').locator('.phone-card').first()).toHaveCSS('backdrop-filter', 'none');
+});

@@ -68,3 +68,13 @@ export function surfaceSx(kind: SurfaceKind, opts: LayerOptions & { materialAlph
     return layerCss(theme.uiStyle, kind, theme.resolved, opts);
   };
 }
+
+/**
+ * Glass on phones: each content section (stats table, graph, times grid) gets its own frosted card, since the
+ * phone panes otherwise sit straight on the background photo. Desktop content already sits on a frosted pane.
+ * A few large cards rather than one per time tile keeps scrolling cheap.
+ */
+export function phoneCardSx(padding = 0): (theme: Theme) => CSSObject {
+  // px strings: sx reads bare numbers for margin/padding as theme spacing units (8 → 64px).
+  return theme => (theme.uiStyle === 'glass' ? { ...layerCss('glass', 'content', theme.resolved), margin: '8px', padding: `${padding}px` } : {});
+}

@@ -3,7 +3,7 @@ import { expect, test } from 'vitest';
 import { DEFAULT_SETTINGS, UI_STYLE_IDS } from '../../core/settings';
 import { makeTheme } from './makeTheme';
 import { resolveTheme } from './resolve';
-import { surfaceSx } from './surface';
+import { phoneCardSx, surfaceSx } from './surface';
 
 const r = resolveTheme({ palette: 'indigo', customTheme: DEFAULT_SETTINGS.customTheme, themeMode: 'light' }, false);
 const css = (v: unknown) => JSON.stringify(v);
@@ -129,4 +129,9 @@ test('glass tab capsule flows: springy slide plus a stretch on every switch', ()
   expect(base).toContain('@keyframes glass-flow-b');
   expect(base).toContain('.glass-tabs[data-flow=\\"a\\"] .MuiTabs-indicator');
   expect(base).toContain('prefers-reduced-motion');
+});
+
+test('phone glass cards use px spacing, not theme spacing units', () => {
+  expect(phoneCardSx(8)(makeTheme(r, 'X', 'glass'))).toMatchObject({ margin: '8px', padding: '8px' });
+  expect(phoneCardSx(8)(makeTheme(r, 'X'))).toEqual({});
 });

@@ -101,6 +101,7 @@ export const en = {
   'font.mono': 'Monospace',
   'font.display': 'Display (timer only)',
   'font.sameAsApp': 'Same as app font',
+  'font.sample': 'Aa ao5 9.87',
   'theme.background': 'Background image',
   'theme.backgroundHelp': 'Your own picture behind the app. It stays on this device and is not part of backups.',
   'theme.chooseImage': 'Choose image…',

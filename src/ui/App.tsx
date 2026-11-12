@@ -14,7 +14,7 @@ import { makeTheme } from './theme/makeTheme';
 import { resolveTheme } from './theme/resolve';
 import { AppBackground, themeVars } from './theme/AppBackground';
 import { useBackgroundImageUrl } from './theme/useBackgroundImage';
-import { ensureFont, timerFamily } from './theme/fonts';
+import { ensureFont, FONTS, timerFamily } from './theme/fonts';
 import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
@@ -41,10 +41,12 @@ function Themed() {
     () => resolveTheme({ palette: settings.palette, customTheme: settings.customTheme, themeMode: settings.themeMode }, systemDark),
     [settings.palette, settings.customTheme, settings.themeMode, systemDark],
   );
-  const theme = useMemo(() => makeTheme(resolved), [resolved]);
+  const appFamily = FONTS[settings.appFont].family;
+  const theme = useMemo(() => makeTheme(resolved, appFamily), [resolved, appFamily]);
   const imageUrl = useBackgroundImageUrl();
   const image = imageUrl ? { url: imageUrl, dim: settings.backgroundDim } : null;
   useEffect(() => ensureFont(settings.timerFont), [settings.timerFont]);
+  useEffect(() => ensureFont(settings.appFont), [settings.appFont]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

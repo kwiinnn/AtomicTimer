@@ -29,19 +29,23 @@ export function FontPicker<Id extends string>({ label, ids, value, onChange, sam
   }, [ids]);
 
   const option = (id: Id, name: string, family: string) => (
-    <FormControlLabel key={id} value={id} control={<Radio />} sx={{ m: 0, alignItems: 'center' }}
+    <FormControlLabel key={id} value={id} control={<Radio />}
+      sx={{ m: 0, minWidth: 0, alignItems: 'center', '& .MuiFormControlLabel-label': { minWidth: 0, flex: 1 } }}
       label={
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontFamily: family, fontWeight: 700, fontSize: '1.35rem', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} aria-hidden>
+          {/* Fixed box: fonts swapping in as they load must not shift the options under the pointer. */}
+          <Typography sx={{ fontFamily: family, fontWeight: 700, fontSize: { xs: '1.05rem', sm: '1.2rem' }, lineHeight: '1.6rem', height: '1.6rem',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} aria-hidden>
             {sample}
           </Typography>
-          <Typography variant="body2" color="text.secondary">{name}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ height: '1.25rem', lineHeight: '1.25rem', whiteSpace: 'nowrap' }}>{name}</Typography>
         </Box>
       } />
   );
 
   return (
-    <RadioGroup aria-label={label} value={value} onChange={e => onChange(e.target.value as Id)}>
+    // A plain block: RadioGroup's default wrapping flex column leaves large gaps between the groups.
+    <RadioGroup aria-label={label} value={value} onChange={e => onChange(e.target.value as Id)} sx={{ display: 'block' }}>
       {extra && extra.length > 0 && (
         <Box sx={{ mb: 1.5 }}>{extra.map(x => option(x.id, x.label, x.family))}</Box>
       )}
@@ -51,7 +55,7 @@ export function FontPicker<Id extends string>({ label, ids, value, onChange, sam
         return (
           <Box key={g.category} sx={{ mb: 1.5 }}>
             <Typography variant="overline" color="text.secondary">{t(g.title)}</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 1 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 1 }}>
               {members.map(id => {
                 const f = FONTS[id as keyof typeof FONTS];
                 return option(id, f.label, f.family);

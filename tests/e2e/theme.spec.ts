@@ -34,6 +34,8 @@ async function openTheme(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('navigation').getByRole('button', { name: 'Theme' }).click();
   await expect(page.getByRole('heading', { name: 'Theme', exact: true })).toBeVisible();
+  // The drawer fades out over the page; wait so clicks land on the page itself.
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
 }
 
 test('picking a preset changes the background', async ({ page }) => {
@@ -107,5 +109,46 @@ test('any catalogue font can be the timer font', async ({ page }) => {
   expect(await page.evaluate(async () => {
     await document.fonts.ready;
     return document.fonts.check('700 48px "Newsreader"');
+  })).toBe(true);
+});
+
+test('app font applies to the whole interface; timer can follow it', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('radiogroup', { name: 'App font' }).getByRole('radio', { name: 'Source Serif 4' }).check();
+  await expect(page.getByRole('heading', { name: 'Theme', exact: true })).toHaveCSS('font-family', /Source Serif 4/);
+  await expect(page.locator('header button').first()).toBeVisible();
+  await expect(page.getByTestId('puzzle-picker')).toHaveCSS('font-family', /Source Serif 4/);
+  // Display faces are timer-only.
+  await expect(page.getByRole('radiogroup', { name: 'App font' }).getByRole('radio', { name: /LCD/ })).toHaveCount(0);
+
+  await page.getByRole('radiogroup', { name: 'Timer font' }).getByRole('radio', { name: 'Same as app font' }).check();
+  await waitForSavedSettings(page, { appFont: 'sourceSerif', timerFont: 'app' });
+  await page.reload();
+  await expect(page.getByTestId('timer-display')).toHaveCSS('font-family', /Source Serif 4/);
+  await expect(page.getByTestId('scramble-text')).toHaveCSS('font-family', /Source Serif 4/);
+});
+
+test('a chosen font keeps working offline after first use', async ({ page, context, isMobile }) => {
+  test.skip(isMobile, 'one project is enough for the service worker check');
+  await ready(page);
+  await page.evaluate(async () => {
+    const reg = await navigator.serviceWorker.ready;
+    if (reg.active?.state !== 'activated') await new Promise<void>(r => reg.active?.addEventListener('statechange', () => r()));
+  });
+  // Reload so the service worker controls the page (and can cache fonts it fetches).
+  await page.reload();
+  await expect(page.getByTestId('scramble-text')).toHaveText(/\S/, { timeout: 30_000 });
+  await openTheme(page);
+  await page.getByRole('radiogroup', { name: 'App font' }).getByRole('radio', { name: 'Inter' }).check();
+  await waitForSavedSettings(page, { appFont: 'inter' });
+  expect(await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('500 16px "Inter"'); })).toBe(true);
+
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByTestId('puzzle-picker')).toHaveCSS('font-family', /Inter/);
+  expect(await page.evaluate(async () => {
+    await document.fonts.load('500 16px "Inter"');
+    return document.fonts.check('500 16px "Inter"');
   })).toBe(true);
 });

@@ -1,9 +1,8 @@
 import { alpha, createTheme, lighten, type Theme } from '@mui/material/styles';
 import type { ResolvedTheme } from './resolve';
 
-export const TIMER_FONT = '"Quicksand", system-ui, sans-serif';
-
-export function makeTheme(r: ResolvedTheme): Theme {
+/** MUI theme from the resolved colours and the app font stack. */
+export function makeTheme(r: ResolvedTheme, fontFamily: string): Theme {
   const { mode } = r;
   const p = { primary: r.primary, secondary: r.secondary };
   return createTheme({
@@ -15,7 +14,7 @@ export function makeTheme(r: ResolvedTheme): Theme {
       background: mode === 'dark' ? { default: r.stops[0], paper: '#1e1e1e' } : { default: r.stops[0], paper: '#ffffff' },
       text: { primary: r.ink },
     },
-    typography: { fontFamily: TIMER_FONT },
+    typography: { fontFamily },
     shape: { borderRadius: 8 },
     components: {
       // The toolbar floats on the theme gradient.

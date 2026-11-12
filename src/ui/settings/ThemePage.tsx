@@ -15,7 +15,7 @@ import Switch from '@mui/material/Switch';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useRef, useState, type ReactNode } from 'react';
 import { downscaleImage } from '../../platform/images';
-import { FONT_IDS, type TimerFontId } from '../../core/settings';
+import { APP_FONT_IDS, FONT_IDS, type FontId, type TimerFontId } from '../../core/settings';
 import { timerFamily } from '../theme/fonts';
 import { FontPicker } from './FontPicker';
 import { PALETTE_IDS, type CustomTheme, type PaletteChoice, type ThemeMode } from '../../core/settings';
@@ -120,6 +120,11 @@ export function ThemePage() {
               onChange={(_, v) => setCustom({ angle: v as number })} valueLabelDisplay="auto" valueLabelFormat={v => `${v}°`} />
           </Section>
         )}
+
+        <Section title={t('theme.appFont')}>
+          <FontPicker label={t('theme.appFont')} sample={t('font.sample')} ids={APP_FONT_IDS} value={settings.appFont}
+            onChange={(appFont: FontId) => void updateSettings({ appFont })} />
+        </Section>
 
         <Section title={t('theme.timerFont')}>
           <FontPicker label={t('theme.timerFont')} sample="12.34" ids={FONT_IDS} value={settings.timerFont}

@@ -43,3 +43,17 @@ export function colorsOf(s: Pick<Settings, 'palette' | 'customTheme'>): { primar
   const p = PALETTES[s.palette];
   return { primary: p.primary, secondary: p.secondary };
 }
+
+const rgb = (hex: string) => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number];
+const hexOf = (c: number[]) => `#${c.map(v => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, '0')).join('')}`;
+
+/** `a` moved toward `b` by `t` (0 → a, 1 → b), as '#rrggbb'. */
+export function mix(a: string, b: string, t: number): string {
+  const [x, y] = [rgb(a), rgb(b)];
+  return hexOf(x.map((v, i) => v + (y[i]! - v) * t));
+}
+
+/** The opaque colour seen when `fg` at `alpha` is painted over `bg`. */
+export function compositeOver(fg: string, alpha: number, bg: string): string {
+  return mix(bg, fg, alpha);
+}

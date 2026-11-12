@@ -78,6 +78,7 @@ export const en = {
   'settings.timerText': 'Timer text size',
   'settings.scrambleText': 'Scramble text size',
   'settings.theme': 'Theme and colours…',
+  'stats.count': 'Count',
   'theme.title': 'Theme',
   'theme.mode': 'Mode',
   'theme.style': 'Style',

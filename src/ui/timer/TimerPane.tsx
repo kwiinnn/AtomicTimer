@@ -38,7 +38,13 @@ function inspectionText(startedAt: number, now: number): string {
   return now - startedAt <= INSPECTION.dnfAfterMs ? '+2' : 'DNF';
 }
 
-export function TimerPane({ onSolveDeleted, tools }: { onSolveDeleted?: (s: Solve) => void; tools?: ReactNode }) {
+export function TimerPane({ onSolveDeleted, tools, wide = false }: {
+  onSolveDeleted?: (s: Solve) => void;
+  /** Bottom-left slot: the graph panel on desktop, quick stats on phones. */
+  tools?: ReactNode;
+  /** Desktop layout: a larger scramble image. */
+  wide?: boolean;
+}) {
   const { session, settings, storage, scrambles, solves, setTimerBusy, openPuzzlePicker, openSessionPicker } = useApp();
   const recorder = useMemo(
     () => createSolveRecorder({ scrambles, save: s => storage.putSolve(s), newId, now }),
@@ -176,7 +182,7 @@ export function TimerPane({ onSolveDeleted, tools }: { onSolveDeleted?: (s: Solv
       <Box className="hide-while-timing" sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 2, p: 1 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>{tools}</Box>
         <Box data-no-timer>
-          {scramble && <ScrambleImage puzzle={puzzle} scramble={scramble} height={tools ? 150 : 110} onClick={() => setEnlarged(true)} />}
+          {scramble && <ScrambleImage puzzle={puzzle} scramble={scramble} height={wide ? 150 : 110} onClick={() => setEnlarged(true)} />}
         </Box>
       </Box>
       <Snackbar open={!!unsaved} message={t('save.failed')} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}

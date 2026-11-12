@@ -22,6 +22,7 @@ import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
 import { StatsPane } from './stats/StatsPane';
 import { GraphPanel } from './stats/GraphPanel';
+import { QuickStats } from './stats/QuickStats';
 import { DESKTOP_QUERY } from './layout/Shell';
 import { E2EHooks } from './state/E2EHooks';
 import { SettingsPage } from './settings/SettingsPage';
@@ -59,7 +60,7 @@ function Themed() {
       <E2EHooks />
       <UndoProvider>
         <Shell
-          timer={<TimerPane tools={desktop ? <GraphPanel /> : undefined} />}
+          timer={<TimerPane tools={desktop ? <GraphPanel /> : <QuickStats />} wide={desktop} />}
           times={<TimesList />}
           stats={<StatsPane graph={!desktop} />}
           page={page}

@@ -335,3 +335,13 @@ test('snackbars stay readable in glass', async ({ page }) => {
   await page.getByTestId('quick-delete').click();
   await expect(page.locator('.MuiSnackbarContent-root')).toHaveCSS('color', 'rgb(31, 31, 31)');
 });
+
+test('the nav drawer is rounded only on its open side', async ({ page }) => {
+  await pickGlass(page);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const paper = page.locator('.MuiDrawer-paper');
+  await expect(paper).toHaveCSS('border-top-left-radius', '0px');
+  await expect(paper).toHaveCSS('border-bottom-left-radius', '0px');
+  await expect(paper).toHaveCSS('border-top-right-radius', '24px');
+  await expect(paper).toHaveCSS('border-bottom-right-radius', '24px');
+});

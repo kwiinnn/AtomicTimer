@@ -94,12 +94,11 @@ function styled(style: UiStyle, r: ResolvedTheme, primary: string): Components<T
     MuiDrawer: {
       styleOverrides: {
         // Rounded on the open side only, whichever edge the drawer comes from.
-        paper: {
-          ...layerCss(style, 'overlay', r),
-          '&.MuiDrawer-paperAnchorLeft': { borderRadius: `0 ${radius}px ${radius}px 0` },
-          '&.MuiDrawer-paperAnchorRight': { borderRadius: `${radius}px 0 0 ${radius}px` },
-          '&.MuiDrawer-paperAnchorTop': { borderRadius: `0 0 ${radius}px ${radius}px` },
-          '&.MuiDrawer-paperAnchorBottom': { borderRadius: `${radius}px ${radius}px 0 0` },
+        // (MUI 9 puts the anchor class on the root, not the paper, so read ownerState.)
+        paper: ({ ownerState }) => {
+          const R = `${radius}px`;
+          const corners = { left: `0 ${R} ${R} 0`, right: `${R} 0 0 ${R}`, top: `0 0 ${R} ${R}`, bottom: `${R} ${R} 0 0` };
+          return { ...layerCss(style, 'overlay', r), borderRadius: corners[ownerState.anchor ?? 'left'] };
         },
       },
     },

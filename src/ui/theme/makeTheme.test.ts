@@ -89,9 +89,13 @@ test('outline keeps each button colour (error stays red)', () => {
 });
 
 test('drawer corners follow its anchor', () => {
-  const paper = css(makeTheme(r, 'X', 'glass').components!.MuiDrawer!.styleOverrides!.paper);
-  expect(paper).toContain('"&.MuiDrawer-paperAnchorBottom":{"borderRadius":"24px 24px 0 0"}');
-  expect(paper).toContain('"&.MuiDrawer-paperAnchorLeft":{"borderRadius":"0 24px 24px 0"}');
+  // MUI 9 has no per-anchor class on the paper, so the override reads ownerState.anchor.
+  const t = makeTheme(r, 'X', 'glass');
+  const paper = t.components!.MuiDrawer!.styleOverrides!.paper as (p: { ownerState: { anchor?: string }; theme: typeof t }) => Record<string, unknown>;
+  expect(paper({ ownerState: { anchor: 'bottom' }, theme: t })).toMatchObject({ borderRadius: '24px 24px 0 0' });
+  expect(paper({ ownerState: { anchor: 'left' }, theme: t })).toMatchObject({ borderRadius: '0 24px 24px 0' });
+  expect(paper({ ownerState: { anchor: 'right' }, theme: t })).toMatchObject({ borderRadius: '24px 0 0 24px' });
+  expect(paper({ ownerState: { anchor: 'top' }, theme: t })).toMatchObject({ borderRadius: '0 0 24px 24px' });
 });
 
 test('reduced transparency is part of every glass surface, not only Papers', () => {

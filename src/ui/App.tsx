@@ -13,6 +13,7 @@ import { AppProvider, useApp } from './state/AppContext';
 import { makeTheme } from './theme/makeTheme';
 import { resolveTheme } from './theme/resolve';
 import { AppBackground, themeVars } from './theme/AppBackground';
+import { useBackgroundImageUrl } from './theme/useBackgroundImage';
 import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
@@ -40,10 +41,12 @@ function Themed() {
     [settings.palette, settings.customTheme, settings.themeMode, systemDark],
   );
   const theme = useMemo(() => makeTheme(resolved), [resolved]);
+  const imageUrl = useBackgroundImageUrl();
+  const image = imageUrl ? { url: imageUrl, dim: settings.backgroundDim } : null;
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved) }} />
+      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image) }} />
       <AppBackground />
       <E2EHooks />
       <UndoProvider>

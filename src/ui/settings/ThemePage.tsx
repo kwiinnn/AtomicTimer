@@ -10,7 +10,11 @@ import Slider from '@mui/material/Slider';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import type { ReactNode } from 'react';
+import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { useRef, useState, type ReactNode } from 'react';
+import { downscaleImage } from '../../platform/images';
 import { PALETTE_IDS, type CustomTheme, type PaletteChoice, type ThemeMode } from '../../core/settings';
 import { t } from '../i18n';
 import { useApp } from '../state/AppContext';
@@ -41,7 +45,21 @@ function ColourField({ label, value, onChange }: { label: string; value: string;
 }
 
 export function ThemePage() {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, storage } = useApp();
+  const hasImage = useLiveQuery(async () => !!(await storage.getAsset('background')), [storage]) ?? false;
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [imageError, setImageError] = useState(false);
+  const pickImage = async (file: File | undefined) => {
+    if (fileInput.current) fileInput.current.value = '';
+    if (!file) return;
+    try {
+      await storage.putAsset('background', await downscaleImage(file));
+      setImageError(false);
+      await updateSettings({ backgroundImage: true });
+    } catch {
+      setImageError(true);
+    }
+  };
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
   const custom = settings.palette === 'custom';
   const setCustom = (patch: Partial<CustomTheme>) => void updateSettings({ palette: 'custom', customTheme: { ...settings.customTheme, ...patch } });
@@ -99,6 +117,31 @@ export function ThemePage() {
               onChange={(_, v) => setCustom({ angle: v as number })} valueLabelDisplay="auto" valueLabelFormat={v => `${v}°`} />
           </Section>
         )}
+
+        <Section title={t('theme.background')}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{t('theme.backgroundHelp')}</Typography>
+          <input ref={fileInput} type="file" accept="image/*" hidden data-testid="background-input" onChange={e => void pickImage(e.target.files?.[0])} />
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button variant="contained" onClick={() => fileInput.current?.click()}>{t('theme.chooseImage')}</Button>
+            {hasImage && (
+              <Button color="error" onClick={() => void storage.putAsset('background', null).then(() => updateSettings({ backgroundImage: false }))}>
+                {t('theme.removeImage')}
+              </Button>
+            )}
+          </Box>
+          {imageError && <Typography color="error" sx={{ mt: 1 }}>{t('theme.imageFailed')}</Typography>}
+          {hasImage && (
+            <Box sx={{ mt: 2 }}>
+              <FormControlLabel label={t('theme.showImage')}
+                control={<Switch checked={settings.backgroundImage} onChange={e => void updateSettings({ backgroundImage: e.target.checked })}
+                  slotProps={{ input: { role: 'switch', 'aria-label': t('theme.showImage') } }} />} />
+              <Typography id="theme-dim">{t('theme.dim')}: <b>{Math.round(settings.backgroundDim * 100)}%</b></Typography>
+              <Slider aria-labelledby="theme-dim" min={0} max={0.9} step={0.05} value={settings.backgroundDim}
+                disabled={!settings.backgroundImage} onChange={(_, v) => void updateSettings({ backgroundDim: v as number })}
+                valueLabelDisplay="auto" valueLabelFormat={v => `${Math.round(v * 100)}%`} />
+            </Box>
+          )}
+        </Section>
       </Box>
     </Box>
   );

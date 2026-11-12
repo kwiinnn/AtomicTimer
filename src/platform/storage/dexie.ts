@@ -1,14 +1,16 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Session, Solve } from '../../core/model';
 import { migrateSettings, type Settings } from '../../core/settings';
-import type { AppStorage } from './types';
+import type { AppStorage, AssetKey } from './types';
 
 type SettingsRow = { key: 'app'; value: unknown };
+type AssetRow = { key: AssetKey; blob: Blob };
 
 class AtomicDb extends Dexie {
   sessions!: EntityTable<Session, 'id'>;
   solves!: EntityTable<Solve, 'id'>;
   settings!: EntityTable<SettingsRow, 'key'>;
+  assets!: EntityTable<AssetRow, 'key'>;
 
   constructor(name: string) {
     super(name);
@@ -17,6 +19,8 @@ class AtomicDb extends Dexie {
       solves: 'id, sessionId, [sessionId+createdAt]',
       settings: 'key',
     });
+    // v2: user assets (background image). Existing data is untouched.
+    this.version(2).stores({ assets: 'key' });
   }
 }
 
@@ -58,6 +62,11 @@ export function createDexieStorage(dbName = 'atomic-timer'): AppStorage {
         solves: await db.solves.orderBy('[sessionId+createdAt]').toArray(),
         settings: migrateSettings((await db.settings.get('app'))?.value),
       })),
+    getAsset: async key => (await db.assets.get(key))?.blob,
+    putAsset: async (key, blob) => {
+      if (blob) await db.assets.put({ key, blob });
+      else await db.assets.delete(key);
+    },
   };
 }
 

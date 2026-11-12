@@ -62,3 +62,28 @@ test('settings default then round trip', async () => {
   await s.putSettings({ ...DEFAULT_SETTINGS, holdMs: 0 });
   expect((await s.getSettings()).holdMs).toBe(0);
 });
+
+test('background image blob: put, get, replace, remove', async () => {
+  const s = db();
+  expect(await s.getAsset('background')).toBeUndefined();
+  await s.putAsset('background', new Blob(['first'], { type: 'image/jpeg' }));
+  await s.putAsset('background', new Blob(['second!'], { type: 'image/png' }));
+  const got = await s.getAsset('background');
+  expect(got?.type).toBe('image/png');
+  expect(await got?.text()).toBe('second!');
+  await s.putAsset('background', null);
+  expect(await s.getAsset('background')).toBeUndefined();
+});
+test('upgrading a v1 database keeps sessions and solves', async () => {
+  const name = `upgrade-${n++}`;
+  const { default: Dexie } = await import('dexie');
+  const v1 = new Dexie(name);
+  v1.version(1).stores({ sessions: 'id, order', solves: 'id, sessionId, [sessionId+createdAt]', settings: 'key' });
+  await v1.table('sessions').put(session('old', 0));
+  await v1.table('solves').put(solve('1', 'old', 1));
+  v1.close();
+  const s = createDexieStorage(name);
+  expect((await s.listSessions()).map(x => x.id)).toEqual(['old']);
+  expect(await s.listSolves('old')).toHaveLength(1);
+  expect(await s.getAsset('background')).toBeUndefined();
+});

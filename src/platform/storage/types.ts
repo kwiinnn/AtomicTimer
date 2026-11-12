@@ -1,6 +1,8 @@
 import type { Session, Solve } from '../../core/model';
 import type { Settings } from '../../core/settings';
 
+export type AssetKey = 'background';
+
 export interface AppStorage {
   /** Sorted by `order`. */
   listSessions(): Promise<Session[]>;
@@ -17,4 +19,8 @@ export interface AppStorage {
   getSettings(): Promise<Settings>;
   putSettings(s: Settings): Promise<void>;
   exportAll(): Promise<{ sessions: Session[]; solves: Solve[]; settings: Settings }>;
+  /** User files such as the background image; not part of backups. */
+  getAsset(key: AssetKey): Promise<Blob | undefined>;
+  /** Stores `blob`, or removes the asset when `blob` is null. */
+  putAsset(key: AssetKey, blob: Blob | null): Promise<void>;
 }

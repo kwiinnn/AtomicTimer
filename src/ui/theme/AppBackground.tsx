@@ -8,11 +8,23 @@ export function AppBackground() {
   );
 }
 
+function rgba(hex: string, a: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
+/** The full background stack: a theme-coloured dim over the user's image (if any), over the gradient. */
+export function backgroundCss(r: { gradient: string; stops: [string, string]; angle: number }, image: { url: string; dim: number } | null): string {
+  if (!image) return r.gradient;
+  const dim = `linear-gradient(${r.angle}deg, ${rgba(r.stops[0], image.dim)}, ${rgba(r.stops[1], image.dim)})`;
+  return `${dim}, url("${image.url}"), ${r.gradient}`;
+}
+
 /** CSS variables carrying the resolved theme to plain-CSS consumers. */
-export function themeVars(r: { gradient: string; holding: string; ready: string; ink: string }) {
+export function themeVars(r: { gradient: string; stops: [string, string]; angle: number; holding: string; ready: string; ink: string }, image: { url: string; dim: number } | null = null) {
   return {
     ':root': {
-      '--app-background': r.gradient,
+      '--app-background': backgroundCss(r, image),
       '--timer-holding': r.holding,
       '--timer-ready': r.ready,
       '--app-ink': r.ink,

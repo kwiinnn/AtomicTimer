@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { join } from 'node:path';
 import { ready } from './helpers/solve';
 
 const bgImage = (page: import('@playwright/test').Page, testId: string) =>
@@ -57,4 +58,23 @@ test('custom gradient editor previews live and persists', async ({ page }) => {
   await expect(page.locator('header')).toHaveCSS('color', 'rgb(255, 255, 255)');
   await page.reload();
   await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /rgb\(0, 0, 0\).*rgb\(32, 58, 67\)/);
+});
+
+test('background image: upload, dim, persist, remove', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByTestId('background-input').setInputFiles(join(import.meta.dirname, 'fixtures', 'background.png'));
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /url\("blob:/);
+  await expect(page.getByRole('switch', { name: 'Show background image' })).toBeChecked();
+  const dim = page.getByRole('slider', { name: 'Dim' });
+  await dim.focus();
+  await page.keyboard.press('Home');
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /rgba\([^)]*, 0\)/);
+
+  await page.reload();
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /url\("blob:/);
+
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Remove image' }).click();
+  await expect(page.getByTestId('app-background')).not.toHaveCSS('background-image', /url\(/);
 });

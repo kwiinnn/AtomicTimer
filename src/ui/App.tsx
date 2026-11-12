@@ -4,7 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import GlobalStyles from '@mui/material/GlobalStyles';
 import { ThemeProvider } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { createScrambleService } from '../platform/scramble';
 import { createDexieStorage } from '../platform/storage/dexie';
 import { t } from './i18n';
@@ -14,6 +14,7 @@ import { makeTheme } from './theme/makeTheme';
 import { resolveTheme } from './theme/resolve';
 import { AppBackground, themeVars } from './theme/AppBackground';
 import { useBackgroundImageUrl } from './theme/useBackgroundImage';
+import { ensureTimerFont, TIMER_FONTS } from './theme/timerFonts';
 import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
@@ -43,10 +44,11 @@ function Themed() {
   const theme = useMemo(() => makeTheme(resolved), [resolved]);
   const imageUrl = useBackgroundImageUrl();
   const image = imageUrl ? { url: imageUrl, dim: settings.backgroundDim } : null;
+  useEffect(() => ensureTimerFont(settings.timerFont), [settings.timerFont]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image) }} />
+      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image, TIMER_FONTS[settings.timerFont].family) }} />
       <AppBackground />
       <E2EHooks />
       <UndoProvider>

@@ -13,8 +13,10 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { downscaleImage } from '../../platform/images';
+import { TIMER_FONT_IDS, type TimerFontId } from '../../core/settings';
+import { ensureTimerFont, TIMER_FONTS } from '../theme/timerFonts';
 import { PALETTE_IDS, type CustomTheme, type PaletteChoice, type ThemeMode } from '../../core/settings';
 import { t } from '../i18n';
 import { useApp } from '../state/AppContext';
@@ -48,6 +50,8 @@ export function ThemePage() {
   const { settings, updateSettings, storage } = useApp();
   const hasImage = useLiveQuery(async () => !!(await storage.getAsset('background')), [storage]) ?? false;
   const fileInput = useRef<HTMLInputElement>(null);
+  // Load every timer font so the previews render in their own face.
+  useEffect(() => TIMER_FONT_IDS.forEach(ensureTimerFont), []);
   const [imageError, setImageError] = useState(false);
   const pickImage = async (file: File | undefined) => {
     if (fileInput.current) fileInput.current.value = '';
@@ -117,6 +121,22 @@ export function ThemePage() {
               onChange={(_, v) => setCustom({ angle: v as number })} valueLabelDisplay="auto" valueLabelFormat={v => `${v}°`} />
           </Section>
         )}
+
+        <Section title={t('theme.timerFont')}>
+          <RadioGroup aria-label={t('theme.timerFont')} value={settings.timerFont}
+            onChange={e => void updateSettings({ timerFont: e.target.value as TimerFontId })}
+            sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 1 }}>
+            {TIMER_FONT_IDS.map(id => (
+              <FormControlLabel key={id} value={id} control={<Radio />} sx={{ m: 0 }}
+                label={
+                  <Box>
+                    <Typography sx={{ fontFamily: TIMER_FONTS[id].family, fontWeight: 700, fontSize: '1.6rem', lineHeight: 1.2 }} aria-hidden>12.34</Typography>
+                    <Typography variant="body2" color="text.secondary">{TIMER_FONTS[id].label}</Typography>
+                  </Box>
+                } />
+            ))}
+          </RadioGroup>
+        </Section>
 
         <Section title={t('theme.background')}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{t('theme.backgroundHelp')}</Typography>

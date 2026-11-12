@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import { forwardRef } from 'react';
 import type { TimerState } from '../../core/timer/machine';
-import { TIMER_FONT } from '../theme/makeTheme';
 
 // Theme-resolved colours that stay readable on every gradient (see theme/resolve.ts).
 const COLORS: Partial<Record<TimerState['kind'], string>> = {
@@ -35,7 +34,7 @@ export const TimerDisplay = forwardRef<HTMLDivElement, { kind: TimerState['kind'
             alignItems: 'center',
             justifyContent: 'center',
           }),
-          fontFamily: TIMER_FONT,
+          fontFamily: 'var(--timer-font)',
           fontWeight: 700,
           fontVariantNumeric: 'tabular-nums',
           fontSize: `calc(clamp(3.5rem, 16vw, ${focus ? '12rem' : '9rem'}) * ${scale})`,

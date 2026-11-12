@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { join } from 'node:path';
+import { waitForSavedSettings } from './helpers/db';
 import { ready } from './helpers/solve';
 
 const bgImage = (page: import('@playwright/test').Page, testId: string) =>
@@ -56,6 +57,7 @@ test('custom gradient editor previews live and persists', async ({ page }) => {
   await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /360deg.*rgb\(0, 0, 0\).*rgb\(32, 58, 67\)/);
   // Dark custom colours get light text automatically.
   await expect(page.locator('header')).toHaveCSS('color', 'rgb(255, 255, 255)');
+  await waitForSavedSettings(page, { palette: 'custom' });
   await page.reload();
   await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /rgb\(0, 0, 0\).*rgb\(32, 58, 67\)/);
 });
@@ -77,4 +79,20 @@ test('background image: upload, dim, persist, remove', async ({ page }) => {
   await openTheme(page);
   await page.getByRole('button', { name: 'Remove image' }).click();
   await expect(page.getByTestId('app-background')).not.toHaveCSS('background-image', /url\(/);
+});
+
+test('timer font choice applies to the timer and persists', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('radio', { name: /LCD/ }).check();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.getByTestId('timer-display')).toHaveCSS('font-family', /DSEG7 Classic/);
+  await waitForSavedSettings(page, { timerFont: 'lcd' });
+  expect(await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.check('700 48px "DSEG7 Classic"');
+  })).toBe(true);
+  await page.reload();
+  await expect(page.getByTestId('timer-display')).toHaveCSS('font-family', /DSEG7 Classic/);
 });

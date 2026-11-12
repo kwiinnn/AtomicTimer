@@ -12,6 +12,9 @@ const NOTICES: [string, string, string][] = [
   ['Dexie.js', 'Apache-2.0', 'https://dexie.org'],
   ['uPlot', 'MIT', 'https://github.com/leeoniya/uPlot'],
   ['Quicksand font', 'OFL-1.1', 'https://fonts.google.com/specimen/Quicksand'],
+  ['JetBrains Mono font', 'OFL-1.1', 'https://www.jetbrains.com/lp/mono/'],
+  ['Orbitron font', 'OFL-1.1', 'https://fonts.google.com/specimen/Orbitron'],
+  ['DSEG7 font by keshikan', 'OFL-1.1', 'https://github.com/keshikan/DSEG'],
 ];
 
 export function AboutPage() {

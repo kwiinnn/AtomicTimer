@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { waitForSavedSettings } from './helpers/db';
 import { keyboardSolve, ready } from './helpers/solve';
 
 async function nav(page: Page, item: string) {
@@ -31,7 +32,7 @@ test('dark theme and teal palette persist', async ({ page }) => {
   await nav(page, 'Theme');
   await page.getByRole('radio', { name: 'Dark' }).check();
   await page.getByRole('button', { name: 'Teal' }).click();
-  await page.keyboard.press('Escape');
+  await waitForSavedSettings(page, { themeMode: 'dark', palette: 'teal' });
   await page.reload();
   // Teal's deep gradient (#004d40 → #01579b) behind the app.
   await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /rgb\(0, 77, 64\).*rgb\(1, 87, 155\)/);

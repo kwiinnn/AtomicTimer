@@ -21,13 +21,18 @@ export function backgroundCss(r: { gradient: string; stops: [string, string]; an
 }
 
 /** CSS variables carrying the resolved theme to plain-CSS consumers. */
-export function themeVars(r: { gradient: string; stops: [string, string]; angle: number; holding: string; ready: string; ink: string }, image: { url: string; dim: number } | null = null) {
+export function themeVars(
+  r: { gradient: string; stops: [string, string]; angle: number; holding: string; ready: string; ink: string },
+  image: { url: string; dim: number } | null = null,
+  timerFont = '"Quicksand", system-ui, sans-serif',
+) {
   return {
     ':root': {
       '--app-background': backgroundCss(r, image),
       '--timer-holding': r.holding,
       '--timer-ready': r.ready,
       '--app-ink': r.ink,
+      '--timer-font': timerFont,
     },
   };
 }

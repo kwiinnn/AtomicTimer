@@ -94,6 +94,7 @@ export const en = {
   'theme.to': 'Gradient end',
   'theme.accent': 'Accent',
   'theme.angle': 'Angle',
+  'theme.timerFont': 'Timer font',
   'theme.background': 'Background image',
   'theme.backgroundHelp': 'Your own picture behind the app. It stays on this device and is not part of backups.',
   'theme.chooseImage': 'Choose image…',

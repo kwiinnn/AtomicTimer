@@ -5,7 +5,7 @@ test('defaults match the spec', () => {
   expect(DEFAULT_SETTINGS).toMatchObject({
     version: 1, holdMs: 300, inspection: false, inspectionAlerts: true, thousandths: false, manualEntry: false,
     trimPct: 5, dnfRule: 'wca', showSessionStats: true, showTodayStats: false, discreteGraph: false,
-    timerTextScale: 1, scrambleTextScale: 1, themeMode: 'system', palette: 'indigo', backupReminder: true,
+    timerTextScale: 1, scrambleTextScale: 1, themeMode: 'system', palette: 'indigo',
     lastBackupAt: null, currentSessionId: null,
   });
 });
@@ -77,4 +77,11 @@ test('uiStyle accepts every style and rejects others', () => {
   for (const id of UI_STYLE_IDS) expect(migrateSettings({ uiStyle: id }).uiStyle).toBe(id);
   expect(migrateSettings({ uiStyle: 'neumorphic' }).uiStyle).toBe('material');
   expect(UI_STYLE_IDS).toEqual(['material', 'glass', 'flat', 'outline', 'brutalist']);
+});
+
+test('the retired backup reminder setting is dropped from saved settings', () => {
+  const s = migrateSettings({ backupReminder: false, lastBackupAt: 5 });
+  expect('backupReminder' in s).toBe(false);
+  expect('backupReminder' in DEFAULT_SETTINGS).toBe(false);
+  expect(s.lastBackupAt).toBe(5);
 });

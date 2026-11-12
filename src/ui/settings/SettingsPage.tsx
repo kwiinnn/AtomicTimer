@@ -84,9 +84,6 @@ export function SettingsPage() {
           {slider('settings.scrambleText', settings.scrambleTextScale, 0.5, 2, 0.1, v => void updateSettings({ scrambleTextScale: v }), v => `${Math.round(v * 100)}%`)}
           <ListItem><Button onClick={() => setView('theme')}>{t('settings.theme')}</Button></ListItem>
         </Section>
-        <Section title={t('settings.backup')}>
-          {toggle('backupReminder', 'settings.backupReminder')}
-        </Section>
       </Box>
     </Box>
   );

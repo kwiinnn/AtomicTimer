@@ -28,7 +28,7 @@ import { SettingsPage } from './settings/SettingsPage';
 import { ThemePage } from './settings/ThemePage';
 import { AboutPage } from './about/AboutPage';
 import { ImportExportPage } from './io/ImportExportPage';
-import { BackupReminder } from './io/BackupReminder';
+import { requestPersistence } from '../platform/storage/dexie';
 import { UpdatePrompt } from './components/UpdatePrompt';
 
 const storage = createDexieStorage();
@@ -64,7 +64,6 @@ function Themed() {
           stats={<StatsPane graph={!desktop} />}
           page={page}
         />
-        <BackupReminder />
         <UpdatePrompt />
       </UndoProvider>
     </ThemeProvider>
@@ -72,6 +71,8 @@ function Themed() {
 }
 
 export function App() {
+  // Ask the browser to keep our storage (solves) from being evicted under storage pressure.
+  useEffect(() => void requestPersistence(), []);
   return (
     <AppProvider storage={storage} scrambles={scrambles} fallback={<p style={{ padding: 16 }}>{t('common.loading')}</p>}>
       <Themed />

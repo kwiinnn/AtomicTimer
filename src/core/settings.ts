@@ -69,7 +69,6 @@ export interface Settings {
   appFont: FontId;
   /** How surfaces are drawn; independent of palette and fonts. */
   uiStyle: UiStyle;
-  backupReminder: boolean;
   lastBackupAt: number | null;
   currentSessionId: string | null;
 }
@@ -96,7 +95,6 @@ export const DEFAULT_SETTINGS: Settings = {
   timerFont: 'quicksand',
   appFont: 'quicksand',
   uiStyle: 'material',
-  backupReminder: true,
   lastBackupAt: null,
   currentSessionId: null,
 };

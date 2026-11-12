@@ -73,3 +73,21 @@ test.describe('desktop', () => {
     await expect(page.locator('aside').getByTestId('time-graph')).toHaveCount(0);
   });
 });
+
+test('glass turns the phone tabs into a floating pill', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await ready(page);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Theme' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+  const strip = page.locator('.MuiTabs-root');
+  await expect(strip).toHaveCSS('border-radius', /^(999px|9\.99e\+?\d+px)$/);
+  await expect(strip).toHaveCSS('margin-left', '12px');
+  await expect(page.getByRole('tab')).toHaveText(['Timer', 'Times', 'Stats']);
+  await page.getByRole('tab', { name: 'Times' }).click();
+  await expect(page.getByTestId('times-list')).toBeInViewport();
+});

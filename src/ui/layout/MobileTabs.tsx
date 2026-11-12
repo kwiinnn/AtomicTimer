@@ -16,7 +16,7 @@ export function MobileTabs({ panes }: { panes: [ReactNode, ReactNode, ReactNode]
   return (
     <>
       <Tabs value={tab} onChange={(_, v: number) => select(v)} variant="fullWidth" textColor="inherit"
-        indicatorColor="secondary" className="hide-while-timing" sx={{ color: 'text.primary' }}>
+        indicatorColor="secondary" className="hide-while-timing glass-tabs" sx={{ color: 'text.primary' }}>
         <Tab label={t('tab.timer')} />
         <Tab label={t('tab.times')} />
         <Tab label={t('tab.stats')} />

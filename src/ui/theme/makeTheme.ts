@@ -91,6 +91,20 @@ function styled(style: UiStyle, r: ResolvedTheme, primary: string): Components<T
     MuiDrawer: { styleOverrides: { paper: layerCss(style, 'float', r, { radius: `0 ${radius}px ${radius}px 0` }) } },
     MuiSnackbarContent: { styleOverrides: { root: layerCss(style, 'float', r) } },
     ...controls(style, r, primary),
+    ...(style === 'glass' ? glassTabs(r) : {}),
+  };
+}
+
+/** Glass phone tab strip: a floating inset pill, the selected tab a brighter capsule inside it. Same place and order. */
+function glassTabs(r: ResolvedTheme): Components<Theme> {
+  return {
+    MuiTabs: {
+      styleOverrides: {
+        root: { ...layerCss('glass', 'float', r, { radius: 999 }), margin: '8px 12px', minHeight: 44 },
+        indicator: { height: 'calc(100% - 8px)', top: 4, borderRadius: 999, backgroundColor: alpha(r.ink, 0.14), zIndex: 0 },
+      },
+    },
+    MuiTab: { styleOverrides: { root: { zIndex: 1, minHeight: 44 } } },
   };
 }
 

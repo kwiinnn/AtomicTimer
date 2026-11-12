@@ -42,7 +42,7 @@ function Themed() {
     [settings.palette, settings.customTheme, settings.themeMode, systemDark],
   );
   const appFamily = FONTS[settings.appFont].family;
-  const theme = useMemo(() => makeTheme(resolved, appFamily), [resolved, appFamily]);
+  const theme = useMemo(() => makeTheme(resolved, appFamily, settings.uiStyle), [resolved, appFamily, settings.uiStyle]);
   const imageUrl = useBackgroundImageUrl();
   const image = imageUrl ? { url: imageUrl, dim: settings.backgroundDim } : null;
   useEffect(() => ensureFont(settings.timerFont), [settings.timerFont]);

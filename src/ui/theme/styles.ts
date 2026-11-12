@@ -45,3 +45,6 @@ export function surfaceBase(style: UiStyle, kind: SurfaceKind, r: ResolvedTheme)
 export function effectiveSurface(style: UiStyle, kind: SurfaceKind, r: ResolvedTheme, behind: string): string {
   return compositeOver(surfaceBase(style, kind, r), STYLE_TOKENS[style][kind].fillAlpha, behind);
 }
+
+/** Surfaces on the floating layer (Apple's glass layer): lensed in Glass, and solid under reduced transparency. */
+export const FLOAT_SELECTOR = '.MuiAppBar-root, .MuiDialog-paper, .MuiPopover-paper, .MuiDrawer-paper, .MuiSnackbarContent-root, .glass-tabs, [data-surface="float"]';

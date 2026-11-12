@@ -7,7 +7,6 @@ import Paper from '@mui/material/Paper';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import Slider from '@mui/material/Slider';
-import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Button from '@mui/material/Button';
@@ -23,10 +22,11 @@ import { t } from '../i18n';
 import { useApp } from '../state/AppContext';
 import { PALETTES } from '../theme/palettes';
 import { resolveTheme } from '../theme/resolve';
+import { surfaceSx } from '../theme/surface';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: theme => alpha(theme.palette.background.paper, 0.75), backdropFilter: 'blur(14px)' }}>
+    <Paper variant="outlined" sx={[{ p: 2, mb: 2 }, surfaceSx('content', { materialAlpha: 0.75 })]}>
       <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 1 }}>{title}</Typography>
       {children}
     </Paper>

@@ -39,7 +39,7 @@ Identity:
 | UI | React 19 + MUI 9 (Material Design, styled to echo Cubic Timer's Material 2 look) |
 | Native shell | Capacitor 8 |
 | Scrambles and images | cubing.js 0.66 (scrambles generated in a web worker) |
-| Storage | IndexedDB via Dexie 4, behind a `Storage` interface. `navigator.storage.persist()` is requested, and the app reminds the user to back up periodically. |
+| Storage | IndexedDB via Dexie 4, behind a `Storage` interface. `navigator.storage.persist()` is requested at start-up. |
 | Tests | Vitest (unit), Playwright (end-to-end) |
 | Android toolchain | JDK 21 installed alongside the system JDK and used only by this project's Gradle through `org.gradle.java.home`. Android SDK at `~/Android/Sdk`. |
 
@@ -167,7 +167,6 @@ All stats are computed in `src/core/stats`:
 - Discrete graph [off]
 - Timer text size, scramble text size
 - Theme [system]
-- Backup reminder [on]
 
 **Translations:** English only in v1. All UI strings go through an i18n layer so that more languages can be added later.
 

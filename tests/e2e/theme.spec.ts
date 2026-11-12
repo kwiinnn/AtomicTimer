@@ -240,3 +240,47 @@ test('reduced transparency gives solid glass', async ({ page }) => {
   await expect(settingsPaper(page)).toHaveCSS('backdrop-filter', 'none');
   await expect(settingsPaper(page)).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 });
+
+async function pickGlass(page: import('@playwright/test').Page) {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+}
+
+test('glass lenses the toolbar in Chromium', async ({ page }) => {
+  await pickGlass(page);
+  await expect(page.locator('header')).toHaveCSS('backdrop-filter', /url\("?#lens-/);
+  await expect(page.locator('main .MuiPaper-root').first()).not.toHaveCSS('backdrop-filter', /url/);
+  const id = await page.locator('header').evaluate(el => el.style.getPropertyValue('--lens').match(/#([\w-]+)/)![1]!);
+  await expect(page.locator(`filter#${id} feDisplacementMap`)).toHaveCount(1);
+});
+
+test('late-mounted dialogs get the lens', async ({ page }) => {
+  await pickGlass(page);
+  await page.getByTestId('puzzle-picker').click();
+  await expect(page.locator('.MuiDialog-paper')).toHaveCSS('backdrop-filter', /url\("?#lens-/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.MuiDialog-paper')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Material', exact: true }).click();
+  await page.getByTestId('puzzle-picker').click();
+  await expect(page.locator('.MuiDialog-paper')).toHaveCSS('backdrop-filter', 'none');
+});
+
+test('lens follows a resized surface', async ({ page }) => {
+  await pickGlass(page);
+  const lens = () => page.locator('header').evaluate(el => el.style.getPropertyValue('--lens'));
+  await expect.poll(lens).toMatch(/lens-/);
+  const before = await lens();
+  await page.setViewportSize({ width: 700, height: 900 });
+  await expect.poll(lens).not.toBe(before);
+});
+
+test.describe('on Safari', () => {
+  test.use({ userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15' });
+  test('glass stays frosted without the lens', async ({ page }) => {
+    await page.addInitScript(() => Object.defineProperty(navigator, 'userAgentData', { get: () => undefined }));
+    await pickGlass(page);
+    await expect(page.locator('header')).toHaveCSS('backdrop-filter', /blur\(3px\)/);
+    await expect(page.locator('header')).not.toHaveCSS('backdrop-filter', /url/);
+  });
+});

@@ -13,6 +13,7 @@ import { AppProvider, useApp } from './state/AppContext';
 import { makeTheme } from './theme/makeTheme';
 import { resolveTheme } from './theme/resolve';
 import { AppBackground, glassBlobs, themeVars } from './theme/AppBackground';
+import { LensLayer } from './theme/glass/LensLayer';
 import { useBackgroundImageUrl } from './theme/useBackgroundImage';
 import { ensureFont, FONTS, timerFamily } from './theme/fonts';
 import { TimerPane } from './timer/TimerPane';
@@ -52,6 +53,7 @@ function Themed() {
       <CssBaseline />
       <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image, timerFamily(settings.timerFont, settings.appFont), settings.uiStyle === 'glass' ? glassBlobs(resolved) : null) }} />
       <AppBackground />
+      <LensLayer enabled={settings.uiStyle === 'glass'} />
       <E2EHooks />
       <UndoProvider>
         <Shell

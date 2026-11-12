@@ -20,9 +20,10 @@ test('mix interpolates between two colours', () => {
 
 test('material tokens describe today\'s look', () => {
   expect(STYLE_TOKENS.material).toEqual({
-    radius: 8, control: 'default',
+    radius: 8, unit: 8, control: 'default',
     content: { fillAlpha: 1, blurPx: 0, saturate: 1, lens: false },
     float: { fillAlpha: 1, blurPx: 0, saturate: 1, lens: false },
+    overlay: { fillAlpha: 1, blurPx: 0, saturate: 1, lens: false },
     border: 'none', shadow: 'material',
   });
 });
@@ -35,6 +36,7 @@ test('only glass floating surfaces lens', () => {
   for (const id of UI_STYLE_IDS) {
     expect(STYLE_TOKENS[id].content.lens).toBe(false);
     expect(STYLE_TOKENS[id].float.lens).toBe(id === 'glass');
+    expect(STYLE_TOKENS[id].overlay.lens).toBe(id === 'glass');
   }
 });
 
@@ -57,6 +59,11 @@ describe('text reads on every surface', () => {
               const surface = effectiveSurface(style, kind, r, stop);
               expect(contrastRatio(r.ink, surface), `${c.label}/${r.mode}/${style}/${kind} on ${stop}`).toBeGreaterThanOrEqual(4.5);
             }
+          }
+          // Pop-ups sit over a dimmed modal backdrop, or (menus) straight over text.
+          for (const behind of [...r.stops.map(s => compositeOver('#000000', 0.5, s)), r.ink]) {
+            const surface = effectiveSurface(style, 'overlay', r, behind);
+            expect(contrastRatio(r.ink, surface), `${c.label}/${r.mode}/${style}/overlay on ${behind}`).toBeGreaterThanOrEqual(4.5);
           }
         }
       });

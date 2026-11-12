@@ -16,6 +16,8 @@ function sheen(mode: 'light' | 'dark'): string {
   return `radial-gradient(480px circle at var(--glass-x, 20%) var(--glass-y, 0%), ${alpha('#ffffff', mode === 'dark' ? 0.1 : 0.35)}, transparent 65%)`;
 }
 
+const px = (v: string | number) => (typeof v === 'number' ? `${v}px` : v);
+
 /** Full surface CSS for a style: fill, backdrop, border, radius, shadow (always all of them, so nothing leaks from MuiPaper). */
 export function layerCss(style: UiStyle, kind: SurfaceKind, r: ResolvedTheme, opts: LayerOptions = {}): CSSObject {
   const tokens = STYLE_TOKENS[style];
@@ -39,7 +41,8 @@ export function layerCss(style: UiStyle, kind: SurfaceKind, r: ResolvedTheme, op
     backgroundAttachment: style === 'glass' ? 'fixed' : undefined,
     backdropFilter: backdrop,
     WebkitBackdropFilter: backdrop,
-    borderRadius: opts.edge ? 0 : (opts.radius ?? tokens.radius),
+    // Always a px string: sx would multiply a bare number by shape.borderRadius.
+    borderRadius: opts.edge ? 0 : px(opts.radius ?? tokens.radius),
     boxShadow: shadow,
     border: opts.edge ? 'none' : line,
   };

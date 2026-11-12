@@ -86,10 +86,10 @@ function styled(style: UiStyle, r: ResolvedTheme, primary: string): Components<T
   const radius = STYLE_TOKENS[style].radius;
   return {
     MuiPaper: { styleOverrides: { root: layerCss(style, 'content', r) } },
-    MuiDialog: { styleOverrides: { paper: layerCss(style, 'float', r) } },
-    MuiPopover: { styleOverrides: { paper: layerCss(style, 'float', r) } },
-    MuiDrawer: { styleOverrides: { paper: layerCss(style, 'float', r, { radius: `0 ${radius}px ${radius}px 0` }) } },
-    MuiSnackbarContent: { styleOverrides: { root: layerCss(style, 'float', r) } },
+    MuiDialog: { styleOverrides: { paper: layerCss(style, 'overlay', r) } },
+    MuiPopover: { styleOverrides: { paper: layerCss(style, 'overlay', r) } },
+    MuiDrawer: { styleOverrides: { paper: layerCss(style, 'overlay', r, { radius: `0 ${radius}px ${radius}px 0` }) } },
+    MuiSnackbarContent: { styleOverrides: { root: layerCss(style, 'overlay', r) } },
     ...controls(style, r, primary),
     ...(style === 'glass' ? glassTabs(r) : {}),
   };
@@ -124,7 +124,7 @@ export function makeTheme(r: ResolvedTheme, fontFamily: string, uiStyle: UiStyle
       text: { primary: r.ink },
     },
     typography: { fontFamily },
-    shape: { borderRadius: STYLE_TOKENS[uiStyle].radius },
+    shape: { borderRadius: STYLE_TOKENS[uiStyle].unit },
     uiStyle,
     resolved: r,
     components: {

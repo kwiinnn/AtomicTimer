@@ -18,8 +18,9 @@ test("material keeps today's theme", () => {
   expect(css(m.palette)).toBe(css(t.palette));
 });
 
-test('radius follows the style', () => {
-  expect(UI_STYLE_IDS.map(s => makeTheme(r, 'X', s).shape.borderRadius)).toEqual([8, 24, 12, 12, 0]);
+test('the sx radius unit is about half the panel radius, so 2× cards match the style', () => {
+  // Hand-built cards use sx borderRadius 1–2 (× shape.borderRadius); panels get the full radius in px.
+  expect(UI_STYLE_IDS.map(s => makeTheme(r, 'X', s).shape.borderRadius)).toEqual([8, 12, 6, 6, 0]);
 });
 
 test('glass floating layers reference the lens variable, content panels do not', () => {
@@ -54,4 +55,9 @@ test('surfaceSx keeps material panes identical', () => {
 
 test('surfaceSx follows other styles', () => {
   expect(surfaceSx('content')(makeTheme(r, 'X', 'outline'))).toMatchObject({ backgroundColor: alpha('#ffffff', 0), boxShadow: 'none' });
+});
+
+test('surfaceSx radius is in px, not theme spacing units', () => {
+  // sx multiplies bare numbers by shape.borderRadius, so the radius must be an explicit px string.
+  expect(surfaceSx('content')(makeTheme(r, 'X', 'glass'))).toMatchObject({ borderRadius: '24px' });
 });

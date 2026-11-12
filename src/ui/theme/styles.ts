@@ -2,15 +2,21 @@ import type { UiStyle } from '../../core/settings';
 import { compositeOver, mix } from './palettes';
 import type { ResolvedTheme } from './resolve';
 
-/** Content panels (lists, cards) vs the floating layer (bars, menus, dialogs, controls). */
-export type SurfaceKind = 'content' | 'float';
+/**
+ * Content panels (lists, cards); the docked floating layer (toolbar, tab strip); and pop-ups
+ * (dialogs, menus, drawer, snackbars), which sit over a dimmed backdrop or straight over text.
+ */
+export type SurfaceKind = 'content' | 'float' | 'overlay';
 export interface Layer { fillAlpha: number; blurPx: number; saturate: number; lens: boolean }
 export interface StyleTokens {
   /** Cards and dialogs, px. */
   radius: number;
+  /** MUI shape.borderRadius: the unit sx radii (1–2) multiply, so hand-built cards land near `radius`. */
+  unit: number;
   control: 'default' | 'pill' | 'flat' | 'outlined' | 'block';
   content: Layer;
   float: Layer;
+  overlay: Layer;
   border: 'none' | 'hairline' | 'highlight' | 'heavy';
   shadow: 'material' | 'none' | 'soft' | 'hard';
 }
@@ -19,17 +25,20 @@ const solid: Layer = { fillAlpha: 1, blurPx: 0, saturate: 1, lens: false };
 const clear: Layer = { fillAlpha: 0, blurPx: 0, saturate: 1, lens: false };
 
 export const STYLE_TOKENS: Record<UiStyle, StyleTokens> = {
-  material: { radius: 8, control: 'default', content: solid, float: solid, border: 'none', shadow: 'material' },
-  // Floating glass keeps its blur light: more than ~3px washes out the lens (see plan, spike outcome).
+  material: { radius: 8, unit: 8, control: 'default', content: solid, float: solid, overlay: solid, border: 'none', shadow: 'material' },
+  // Bars keep their blur light: more than ~3px washes out the lens (see plan, spike outcome).
+  // Pop-ups are more frosted, like iOS menus, so text behind them never competes with theirs.
   glass: {
-    radius: 24, control: 'pill',
+    radius: 24, unit: 12, control: 'pill',
     content: { fillAlpha: 0.55, blurPx: 20, saturate: 1.6, lens: false },
     float: { fillAlpha: 0.35, blurPx: 3, saturate: 1.8, lens: true },
+    overlay: { fillAlpha: 0.7, blurPx: 16, saturate: 1.8, lens: true },
     border: 'highlight', shadow: 'soft',
   },
-  flat: { radius: 12, control: 'flat', content: solid, float: solid, border: 'none', shadow: 'none' },
-  outline: { radius: 12, control: 'outlined', content: clear, float: clear, border: 'hairline', shadow: 'none' },
-  brutalist: { radius: 0, control: 'block', content: solid, float: solid, border: 'heavy', shadow: 'hard' },
+  flat: { radius: 12, unit: 6, control: 'flat', content: solid, float: solid, overlay: solid, border: 'none', shadow: 'none' },
+  // Pop-ups stay nearly solid so they read over whatever they cover.
+  outline: { radius: 12, unit: 6, control: 'outlined', content: clear, float: clear, overlay: { ...solid, fillAlpha: 0.92 }, border: 'hairline', shadow: 'none' },
+  brutalist: { radius: 0, unit: 0, control: 'block', content: solid, float: solid, overlay: solid, border: 'heavy', shadow: 'hard' },
 };
 
 export const PAPER = { light: '#ffffff', dark: '#1e1e1e' } as const;

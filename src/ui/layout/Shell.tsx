@@ -14,7 +14,7 @@ export function Shell({ timer, times, stats, page }: { timer: ReactNode; times: 
   const desktop = useMediaQuery(DESKTOP_QUERY, { noSsr: true });
   const [drawer, setDrawer] = useState(false);
   return (
-    <Box sx={{ height: '100dvh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+    <Box sx={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="static" className="hide-while-timing">
         <TopBar onMenu={() => setDrawer(true)} showTitle={desktop} />
       </AppBar>

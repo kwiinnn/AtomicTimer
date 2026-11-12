@@ -52,6 +52,8 @@ test('comment persists after reload', async ({ page, isMobile }) => {
   await page.getByTestId('quick-comment').click();
   await page.getByRole('textbox', { name: 'Comment' }).fill('sub-10 pace');
   await page.getByRole('button', { name: 'Save' }).click();
+  // The dialog closes once the write has committed; reloading earlier would abort it.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.reload();
   await showTimes(page, isMobile);
   await page.getByTestId('solve-row').first().click();

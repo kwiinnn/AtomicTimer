@@ -33,8 +33,8 @@ test('dark theme and teal palette persist', async ({ page }) => {
   await page.getByRole('button', { name: 'Teal' }).click();
   await page.keyboard.press('Escape');
   await page.reload();
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(18, 18, 18)');
-  await expect(page.locator('header')).toHaveCSS('background-color', 'rgb(0, 121, 107)');
+  // Teal's deep gradient (#004d40 → #01579b) behind the app.
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /rgb\(0, 77, 64\).*rgb\(1, 87, 155\)/);
 });
 
 test('about credits the inspirations and licenses', async ({ page }) => {

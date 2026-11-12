@@ -13,13 +13,12 @@ import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
 import { t, type MessageKey } from '../i18n';
 import { useApp, type View } from '../state/AppContext';
-import { primaryOf } from '../theme/palettes';
 
 /** Views and dialogs that exist so far; later features register here. */
 export const ENABLED_NAV = new Set<string>(['timer', 'theme', 'io', 'settings', 'about']);
 
 export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { view, setView, setThemeDialogOpen, settings } = useApp();
+  const { view, setView, setThemeDialogOpen } = useApp();
   const item = (key: MessageKey, icon: ReactNode, onClick: () => void, id: string, selected = false) => (
     <ListItemButton key={id} selected={selected} disabled={!ENABLED_NAV.has(id)}
       onClick={() => { onClose(); onClick(); }}>
@@ -31,7 +30,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
   return (
     <Drawer open={open} onClose={onClose}>
       <Box sx={{ width: 280 }} role="navigation">
-        <Box sx={{ bgcolor: primaryOf(settings), color: '#fff', px: 2, py: 4 }}>
+        <Box sx={{ background: 'var(--app-background)', color: 'var(--app-ink)', px: 2, py: 4 }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('appName')}</Typography>
         </Box>
         <List>

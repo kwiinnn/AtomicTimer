@@ -3,10 +3,10 @@ import { forwardRef } from 'react';
 import type { TimerState } from '../../core/timer/machine';
 import { TIMER_FONT } from '../theme/makeTheme';
 
+// Theme-resolved colours that stay readable on every gradient (see theme/resolve.ts).
 const COLORS: Partial<Record<TimerState['kind'], string>> = {
-  holding: 'error.main',
-  ready: 'success.main',
-  inspecting: 'warning.main',
+  holding: 'var(--timer-holding)',
+  ready: 'var(--timer-ready)',
 };
 
 /**
@@ -28,7 +28,9 @@ export const TimerDisplay = forwardRef<HTMLDivElement, { kind: TimerState['kind'
             position: 'fixed',
             inset: 0,
             zIndex: theme => theme.zIndex.appBar + 1,
-            bgcolor: 'background.default',
+            background: 'var(--app-background)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

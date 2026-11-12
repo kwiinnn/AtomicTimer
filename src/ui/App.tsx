@@ -11,7 +11,8 @@ import { t } from './i18n';
 import { Shell } from './layout/Shell';
 import { AppProvider, useApp } from './state/AppContext';
 import { makeTheme } from './theme/makeTheme';
-import { colorsOf } from './theme/palettes';
+import { resolveTheme } from './theme/resolve';
+import { AppBackground, themeVars } from './theme/AppBackground';
 import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
@@ -34,13 +35,16 @@ function Themed() {
   const page = view === 'settings' ? <SettingsPage /> : view === 'about' ? <AboutPage /> : view === 'io' ? <ImportExportPage /> : undefined;
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
   const desktop = useMediaQuery(DESKTOP_QUERY, { noSsr: true });
-  const mode = settings.themeMode === 'system' ? (systemDark ? 'dark' : 'light') : settings.themeMode;
-  const { primary, secondary } = colorsOf(settings);
-  const theme = useMemo(() => makeTheme(mode, { primary, secondary }), [mode, primary, secondary]);
+  const resolved = useMemo(
+    () => resolveTheme({ palette: settings.palette, customTheme: settings.customTheme, themeMode: settings.themeMode }, systemDark),
+    [settings.palette, settings.customTheme, settings.themeMode, systemDark],
+  );
+  const theme = useMemo(() => makeTheme(resolved), [resolved]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' } }} />
+      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved) }} />
+      <AppBackground />
       <E2EHooks />
       <UndoProvider>
         <Shell

@@ -26,6 +26,7 @@ export const en = {
   'scramble.generating': 'Generating scramble…',
   'scramble.failed': 'Could not generate a scramble — tap to retry',
   'scramble.next': 'Tap for next scramble',
+  'scramble.new': 'New scramble',
   'scramble.enlarge': 'Scramble',
   'quick.plus2': '+2',
   'quick.dnf': 'DNF',

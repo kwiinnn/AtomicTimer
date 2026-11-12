@@ -96,3 +96,21 @@ test('mobile tap solve', async ({ page, isMobile }) => {
   await page.mouse.up();
   await expect(pane(page)).toHaveAttribute('data-solve-count', '1');
 });
+
+test('the New scramble button swaps the scramble without starting the timer', async ({ page }) => {
+  const before = await page.getByTestId('scramble-text').textContent();
+  await page.getByRole('button', { name: 'New scramble' }).click();
+  await expect(page.getByTestId('scramble-text')).not.toHaveText(before!);
+  await expect(page.getByTestId('scramble-text')).toHaveText(SCRAMBLE);
+  await expect(page.getByTestId('timer-display')).toHaveAttribute('data-state', 'idle');
+  await expect(page.getByTestId('timer-pane')).toHaveAttribute('data-solve-count', '0');
+});
+
+test('Space after clicking New scramble does not swap the scramble again', async ({ page }) => {
+  await page.getByRole('button', { name: 'New scramble' }).click();
+  await expect(page.getByTestId('scramble-text')).toHaveText(SCRAMBLE);
+  const shown = await page.getByTestId('scramble-text').textContent();
+  await page.keyboard.press('Space'); // the button still has focus
+  await page.waitForTimeout(400);
+  await expect(page.getByTestId('scramble-text')).toHaveText(shown!);
+});

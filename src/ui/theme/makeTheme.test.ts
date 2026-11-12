@@ -136,12 +136,14 @@ test('phone glass cards use px spacing, not theme spacing units', () => {
   expect(phoneCardSx(8)(makeTheme(r, 'X'))).toEqual({});
 });
 
-test('time tiles use the theme colour at 4% (light) / 8% (dark) in every style', () => {
+test('time tiles: theme colour at 4% (light) / 8% (dark), Glass at 35%', () => {
   for (const themeMode of ['light', 'dark'] as const) {
     const rr = resolveTheme({ palette: 'teal', customTheme: DEFAULT_SETTINGS.customTheme, themeMode }, false);
     for (const s of UI_STYLE_IDS) {
       const t = makeTheme(rr, 'X', s);
-      expect(tileSx(t).backgroundColor, `${s}/${themeMode}`).toBe(alpha(t.palette.primary.main, themeMode === 'dark' ? 0.08 : 0.04));
+      const bg = tileSx(t).backgroundColor as string;
+      if (s === 'glass') expect(bg, `glass/${themeMode}`).toMatch(/, 0\.35\)$/);
+      else expect(bg, `${s}/${themeMode}`).toBe(alpha(t.palette.primary.main, themeMode === 'dark' ? 0.08 : 0.04));
       expect(tileSx(t).border, `${s}/${themeMode}`).toMatch(/^1px solid /);
     }
   }

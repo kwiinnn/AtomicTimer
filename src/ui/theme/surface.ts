@@ -2,7 +2,8 @@ import { alpha, type Theme } from '@mui/material/styles';
 import type { CSSObject } from '@mui/material/styles';
 import type { UiStyle } from '../../core/settings';
 import type { ResolvedTheme } from './resolve';
-import { fillAlpha, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
+import { mix } from './palettes';
+import { fillAlpha, PAPER, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
 
 export interface LayerOptions {
   /** A surface docked to the screen edge (toolbar, side pane): square, bordered on that edge only, no shadow. */
@@ -80,14 +81,20 @@ export function phoneCardSx(padding: number | string = 0): (theme: Theme) => CSS
 }
 
 /**
- * Phone time tiles, every style: the theme colour at the same light tint the tiles always had (MUI's
- * action.hover opacity: 4% light, 8% dark) and one thin, faint line all round. Glass adds a soft shadow.
+ * Phone time tiles, every style: the theme colour at the light tint the tiles always had (MUI's action.hover
+ * opacity: 4% light, 8% dark) and one thin, faint line all round. Glass instead blends the theme colour into
+ * the panel colour at 35%, so the photo shows through while the numbers stay legible, plus a soft shadow.
  */
 export function tileSx(theme: Theme): CSSObject {
+  const r = theme.resolved;
   const tint = theme.palette.primary.main;
-  return {
-    backgroundColor: alpha(tint, theme.resolved.mode === 'dark' ? 0.08 : 0.04),
-    border: `1px solid ${alpha(tint, 0.22)}`,
-    ...(theme.uiStyle === 'glass' ? { boxShadow: '0 4px 14px rgba(0, 0, 0, 0.28)' } : {}),
-  };
+  const border = `1px solid ${alpha(tint, 0.22)}`;
+  if (theme.uiStyle === 'glass') {
+    return {
+      backgroundColor: alpha(mix(PAPER[r.mode], r.primary, r.mode === 'dark' ? 0.35 : 0.3), 0.35),
+      border,
+      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.28)',
+    };
+  }
+  return { backgroundColor: alpha(tint, r.mode === 'dark' ? 0.08 : 0.04), border };
 }

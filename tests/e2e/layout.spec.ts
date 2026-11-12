@@ -229,12 +229,15 @@ test('nothing above a frosted phone card blocks its blur', async ({ page, isMobi
   expect(blockers).toEqual([]);
 });
 
-test('in glass, time tiles take the theme colour at the same opacity as other styles', async ({ page, isMobile }) => {
+test('in glass, time tiles are the theme colour at 35%', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'phone layout only');
   await glassPhoneWithSolves(page);
   await page.getByRole('tab', { name: 'Times' }).click();
-  // Default palette is indigo (#3f51b5 → rgb 63, 81, 181); light mode uses 4%, like Material's tint.
-  await expect(page.getByTestId('solve-row').first()).toHaveCSS('background-color', 'rgba(63, 81, 181, 0.04)');
+  const [r, g, b, a] = (await page.getByTestId('solve-row').first().evaluate(el => getComputedStyle(el).backgroundColor)).match(/[\d.]+/g)!.map(Number);
+  expect(a).toBe(0.35);
+  // Default palette is indigo: blue-dominant.
+  expect(b!).toBeGreaterThan(r!);
+  expect(b!).toBeGreaterThan(g!);
 });
 
 test('time tiles in every style: theme colour at 4% and a thin, faint line all round', async ({ page, isMobile }) => {

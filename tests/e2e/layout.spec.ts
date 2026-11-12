@@ -229,16 +229,26 @@ test('nothing above a frosted phone card blocks its blur', async ({ page, isMobi
   expect(blockers).toEqual([]);
 });
 
-test('in glass, time tiles take the theme colour', async ({ page, isMobile }) => {
+test('in glass, time tiles take the theme colour at the same opacity as other styles', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'phone layout only');
   await glassPhoneWithSolves(page);
   await page.getByRole('tab', { name: 'Times' }).click();
-  // See-through enough to show the photo, solid enough that tiles look alike and stay readable…
-  const colours = await page.getByTestId('solve-row').evaluateAll(els => els.map(el => getComputedStyle(el).backgroundColor));
-  const [r, g, b, a = 1] = colours[0]!.match(/[\d.]+/g)!.map(Number);
-  expect(a).toBeGreaterThanOrEqual(0.65);
-  expect(a).toBeLessThanOrEqual(0.75);
-  // …and in the theme colour: default indigo is blue-dominant.
-  expect(b!).toBeGreaterThan(r!);
-  expect(b!).toBeGreaterThan(g!);
+  // Default palette is indigo (#3f51b5 → rgb 63, 81, 181); light mode uses 4%, like Material's tint.
+  await expect(page.getByTestId('solve-row').first()).toHaveCSS('background-color', 'rgba(63, 81, 181, 0.04)');
+});
+
+test('time tiles in every style: theme colour at 4% and a thin, faint line all round', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await page.goto('/?e2e=1');
+  await page.waitForFunction(() => typeof window.__seed === 'function');
+  await page.evaluate(() => window.__seed!([12000, 13000]));
+  await page.getByRole('tab', { name: 'Times' }).click();
+  const tile = page.getByTestId('solve-row').first();
+  await expect(tile).toHaveCSS('background-color', 'rgba(63, 81, 181, 0.04)');
+  const border = await tile.evaluate(el => {
+    const cs = getComputedStyle(el);
+    return { widths: [cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth], color: cs.borderTopColor };
+  });
+  expect(border.widths).toEqual(['1px', '1px', '1px', '1px']);
+  expect(border.color).toMatch(/^rgba\(63, 81, 181, 0\.2\d*\)$/);
 });

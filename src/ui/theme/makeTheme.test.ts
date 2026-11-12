@@ -1,10 +1,9 @@
 import { alpha } from '@mui/material/styles';
 import { expect, test } from 'vitest';
-import { DEFAULT_SETTINGS, PALETTE_IDS, UI_STYLE_IDS } from '../../core/settings';
+import { DEFAULT_SETTINGS, UI_STYLE_IDS } from '../../core/settings';
 import { makeTheme } from './makeTheme';
 import { resolveTheme } from './resolve';
-import { compositeOver, contrastRatio } from './palettes';
-import { phoneCardSx, surfaceSx, tileDepthSx } from './surface';
+import { phoneCardSx, surfaceSx, tileSx } from './surface';
 
 const r = resolveTheme({ palette: 'indigo', customTheme: DEFAULT_SETTINGS.customTheme, themeMode: 'light' }, false);
 const css = (v: unknown) => JSON.stringify(v);
@@ -137,16 +136,13 @@ test('phone glass cards use px spacing, not theme spacing units', () => {
   expect(phoneCardSx(8)(makeTheme(r, 'X'))).toEqual({});
 });
 
-test('glass time tiles stay readable in every palette, whatever is behind them', () => {
-  for (const palette of PALETTE_IDS) {
-    for (const themeMode of ['light', 'dark'] as const) {
-      const rr = resolveTheme({ palette, customTheme: DEFAULT_SETTINGS.customTheme, themeMode }, false);
-      const bg = tileDepthSx(makeTheme(rr, 'X', 'glass')).backgroundColor as string;
-      const [cr, cg, cb, ca] = bg.match(/[\d.]+/g)!.map(Number);
-      const hex = `#${[cr, cg, cb].map(v => Math.round(v!).toString(16).padStart(2, '0')).join('')}`;
-      for (const behind of ['#000000', '#ffffff']) {
-        expect(contrastRatio(rr.ink, compositeOver(hex, ca!, behind)), `${palette}/${themeMode} over ${behind}`).toBeGreaterThanOrEqual(4.5);
-      }
+test('time tiles use the theme colour at 4% (light) / 8% (dark) in every style', () => {
+  for (const themeMode of ['light', 'dark'] as const) {
+    const rr = resolveTheme({ palette: 'teal', customTheme: DEFAULT_SETTINGS.customTheme, themeMode }, false);
+    for (const s of UI_STYLE_IDS) {
+      const t = makeTheme(rr, 'X', s);
+      expect(tileSx(t).backgroundColor, `${s}/${themeMode}`).toBe(alpha(t.palette.primary.main, themeMode === 'dark' ? 0.08 : 0.04));
+      expect(tileSx(t).border, `${s}/${themeMode}`).toMatch(/^1px solid /);
     }
   }
 });

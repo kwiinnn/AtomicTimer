@@ -1,9 +1,8 @@
-import { alpha, lighten, type Theme } from '@mui/material/styles';
+import { alpha, type Theme } from '@mui/material/styles';
 import type { CSSObject } from '@mui/material/styles';
 import type { UiStyle } from '../../core/settings';
 import type { ResolvedTheme } from './resolve';
-import { mix } from './palettes';
-import { fillAlpha, PAPER, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
+import { fillAlpha, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
 
 export interface LayerOptions {
   /** A surface docked to the screen edge (toolbar, side pane): square, bordered on that edge only, no shadow. */
@@ -81,17 +80,14 @@ export function phoneCardSx(padding: number | string = 0): (theme: Theme) => CSS
 }
 
 /**
- * Glass time tiles: the theme colour blended into the paper, mostly solid so tiles look alike whatever part of
- * the photo is behind them while it still shows through; a thin faint edge, a soft shadow and no per-tile blur.
+ * Phone time tiles, every style: the theme colour at the same light tint the tiles always had (MUI's
+ * action.hover opacity: 4% light, 8% dark) and one thin, faint line all round. Glass adds a soft shadow.
  */
-export function tileDepthSx(theme: Theme): CSSObject {
-  if (theme.uiStyle !== 'glass') return {};
-  const r = theme.resolved;
+export function tileSx(theme: Theme): CSSObject {
+  const tint = theme.palette.primary.main;
   return {
-    // 70% lets the photo show through; it is the lowest that keeps text readable on every palette over pure black/white.
-    backgroundColor: alpha(mix(PAPER[r.mode], r.primary, r.mode === 'dark' ? 0.35 : 0.3), 0.7),
-    // One thin, faint line all round (no inner top highlight, which made the top edge look thicker).
-    border: `1px solid ${alpha(lighten(r.primary, 0.4), 0.22)}`,
-    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.28)',
+    backgroundColor: alpha(tint, theme.resolved.mode === 'dark' ? 0.08 : 0.04),
+    border: `1px solid ${alpha(tint, 0.22)}`,
+    ...(theme.uiStyle === 'glass' ? { boxShadow: '0 4px 14px rgba(0, 0, 0, 0.28)' } : {}),
   };
 }

@@ -12,7 +12,7 @@ import { DESKTOP_QUERY } from '../layout/Shell';
 import { useApp } from '../state/AppContext';
 import { SolveSheet } from './SolveSheet';
 import { useSessionStats } from '../stats/useSessionStats';
-import { tileDepthSx } from '../theme/surface';
+import { tileSx } from '../theme/surface';
 
 /** Rows rendered per page; more are added when the "show more" sentinel scrolls into view. */
 export const PAGE = 100;
@@ -46,8 +46,8 @@ const Row = memo(function Row({ solve, number, desktop, thousandths, ao5, ao12, 
   }
   return (
     <ButtonBase data-testid="solve-row" onClick={() => onOpen(solve.id)}
-      sx={[{ borderRadius: 1, px: 1.5, py: 1, bgcolor: 'action.hover', justifyContent: desktop ? 'space-between' : 'center', gap: 1,
-        fontVariantNumeric: 'tabular-nums' }, tileDepthSx]}>
+      sx={[{ borderRadius: 1, px: 1.5, py: 1, justifyContent: desktop ? 'space-between' : 'center', gap: 1,
+        fontVariantNumeric: 'tabular-nums' }, tileSx]}>
       {desktop && (
         <Typography component="span" variant="body2" color="text.secondary" aria-hidden>{number}</Typography>
       )}

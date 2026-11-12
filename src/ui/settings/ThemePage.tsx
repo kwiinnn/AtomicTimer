@@ -24,6 +24,7 @@ import { useApp } from '../state/AppContext';
 import { PALETTES } from '../theme/palettes';
 import { resolveTheme } from '../theme/resolve';
 import { surfaceSx } from '../theme/surface';
+import { glassBlobs } from '../theme/AppBackground';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -105,7 +106,8 @@ export function ThemePage() {
 
         <Section title={t('theme.style')}>
           <StylePicker value={settings.uiStyle} onChange={uiStyle => void updateSettings({ uiStyle })}
-            resolved={resolved} fontFamily={FONTS[settings.appFont].family} />
+            resolved={resolved} fontFamily={FONTS[settings.appFont].family}
+            backdropFor={s => (s === 'glass' ? glassBlobs(resolved) : null)} />
         </Section>
 
         <Section title={t('theme.presets')}>

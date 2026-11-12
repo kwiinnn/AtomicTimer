@@ -12,7 +12,7 @@ import { Shell } from './layout/Shell';
 import { AppProvider, useApp } from './state/AppContext';
 import { makeTheme } from './theme/makeTheme';
 import { resolveTheme } from './theme/resolve';
-import { AppBackground, themeVars } from './theme/AppBackground';
+import { AppBackground, glassBlobs, themeVars } from './theme/AppBackground';
 import { useBackgroundImageUrl } from './theme/useBackgroundImage';
 import { ensureFont, FONTS, timerFamily } from './theme/fonts';
 import { TimerPane } from './timer/TimerPane';
@@ -50,7 +50,7 @@ function Themed() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image, timerFamily(settings.timerFont, settings.appFont)) }} />
+      <GlobalStyles styles={{ 'body[data-timing="true"] .hide-while-timing': { visibility: 'hidden' }, ...themeVars(resolved, image, timerFamily(settings.timerFont, settings.appFont), settings.uiStyle === 'glass' ? glassBlobs(resolved) : null) }} />
       <AppBackground />
       <E2EHooks />
       <UndoProvider>

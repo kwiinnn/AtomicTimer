@@ -192,3 +192,51 @@ test('each style has its look', async ({ page }) => {
     if (name === 'Brutalist') await expect(settingsPaper(page)).toHaveCSS('box-shadow', /4px 4px 0px/);
   }
 });
+
+test('glass adds palette blobs, other styles do not', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /radial-gradient/);
+  await page.getByRole('button', { name: 'Material', exact: true }).click();
+  await expect(page.getByTestId('app-background')).not.toHaveCSS('background-image', /radial-gradient/);
+});
+
+test('glass with a photo shows no blobs', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByTestId('background-input').setInputFiles(join(import.meta.dirname, 'fixtures', 'background.png'));
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /url\("blob:/);
+  await expect(page.getByTestId('app-background')).not.toHaveCSS('background-image', /radial-gradient/);
+});
+
+test('timing removes backdrop filters', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop panes carry the glass while timing');
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+  await expect(page.locator('header')).toHaveCSS('backdrop-filter', /blur/);
+  await page.keyboard.down('Space');
+  await expect(page.getByTestId('timer-display')).toHaveAttribute('data-state', 'ready');
+  await page.keyboard.up('Space');
+  await expect(page.getByTestId('timer-display')).toHaveAttribute('data-state', 'running');
+  await expect(page.locator('header')).toHaveCSS('backdrop-filter', 'none');
+  await expect(page.locator('aside')).toHaveCSS('backdrop-filter', 'none');
+  await page.keyboard.press('Space');
+  await expect(page.locator('header')).toHaveCSS('backdrop-filter', /blur/);
+});
+
+test('reduced transparency gives solid glass', async ({ page }) => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }] });
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await openSettings(page);
+  await expect(settingsPaper(page)).toHaveCSS('backdrop-filter', 'none');
+  await expect(settingsPaper(page)).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+});

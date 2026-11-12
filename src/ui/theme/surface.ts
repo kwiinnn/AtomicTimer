@@ -81,8 +81,8 @@ export function phoneCardSx(padding: number | string = 0): (theme: Theme) => CSS
 }
 
 /**
- * Phone time tiles, every style: the theme colour at the light tint the tiles always had (MUI's action.hover
- * opacity: 4% light, 8% dark) and one thin, faint line all round. Glass instead blends the theme colour into
+ * Phone time tiles, every style: the theme colour as a light tint (8% light, 16% dark; twice MUI's action.hover)
+ * and one thin, faint line all round. Glass instead blends the theme colour into
  * the panel colour at 35%, so the photo shows through while the numbers stay legible, plus a soft shadow.
  */
 export function tileSx(theme: Theme): CSSObject {
@@ -96,5 +96,5 @@ export function tileSx(theme: Theme): CSSObject {
       boxShadow: '0 4px 14px rgba(0, 0, 0, 0.28)',
     };
   }
-  return { backgroundColor: alpha(tint, r.mode === 'dark' ? 0.08 : 0.04), border };
+  return { backgroundColor: alpha(tint, r.mode === 'dark' ? 0.16 : 0.08), border };
 }

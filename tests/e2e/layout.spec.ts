@@ -240,14 +240,14 @@ test('in glass, time tiles are the theme colour at 35%', async ({ page, isMobile
   expect(b!).toBeGreaterThan(g!);
 });
 
-test('time tiles in every style: theme colour at 4% and a thin, faint line all round', async ({ page, isMobile }) => {
+test('time tiles in non-Glass styles: theme colour at 8% and a thin, faint line all round', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'phone layout only');
   await page.goto('/?e2e=1');
   await page.waitForFunction(() => typeof window.__seed === 'function');
   await page.evaluate(() => window.__seed!([12000, 13000]));
   await page.getByRole('tab', { name: 'Times' }).click();
   const tile = page.getByTestId('solve-row').first();
-  await expect(tile).toHaveCSS('background-color', 'rgba(63, 81, 181, 0.04)');
+  await expect(tile).toHaveCSS('background-color', 'rgba(63, 81, 181, 0.08)');
   const border = await tile.evaluate(el => {
     const cs = getComputedStyle(el);
     return { widths: [cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth], color: cs.borderTopColor };

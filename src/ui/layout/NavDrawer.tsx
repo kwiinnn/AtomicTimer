@@ -18,7 +18,7 @@ import { useApp, type View } from '../state/AppContext';
 export const ENABLED_NAV = new Set<string>(['timer', 'theme', 'io', 'settings', 'about']);
 
 export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { view, setView, setThemeDialogOpen } = useApp();
+  const { view, setView } = useApp();
   const item = (key: MessageKey, icon: ReactNode, onClick: () => void, id: string, selected = false) => (
     <ListItemButton key={id} selected={selected} disabled={!ENABLED_NAV.has(id)}
       onClick={() => { onClose(); onClick(); }}>
@@ -35,7 +35,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
         </Box>
         <List>
           {item('nav.timer', <Timer />, go('timer'), 'timer', view === 'timer')}
-          {item('nav.theme', <Palette />, () => setThemeDialogOpen(true), 'theme')}
+          {item('nav.theme', <Palette />, go('theme'), 'theme', view === 'theme')}
           {item('nav.io', <SwapVert />, go('io'), 'io', view === 'io')}
           {item('nav.settings', <SettingsIcon />, go('settings'), 'settings', view === 'settings')}
           {item('nav.about', <InfoOutlined />, go('about'), 'about', view === 'about')}

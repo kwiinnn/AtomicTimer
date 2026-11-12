@@ -27,3 +27,34 @@ test('dark mode switches to the deep variant', async ({ page }) => {
   await ready(page);
   expect(await bgImage(page, 'app-background')).toContain('rgb(26, 35, 126)');
 });
+
+async function openTheme(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Theme' }).click();
+  await expect(page.getByRole('heading', { name: 'Theme', exact: true })).toBeVisible();
+}
+
+test('picking a preset changes the background', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Ocean', exact: true }).click();
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /rgb\(225, 245, 254\)/);
+  await expect(page.getByRole('button', { name: 'Ocean', exact: true })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('custom gradient editor previews live and persists', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Custom', exact: true }).click();
+  await page.getByLabel('Gradient start').fill('#000000');
+  await page.getByLabel('Gradient end').fill('#203a43');
+  await page.getByLabel('Accent').fill('#ff9800');
+  const angle = page.getByRole('slider', { name: 'Angle' });
+  await angle.focus();
+  await page.keyboard.press('End');
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /360deg.*rgb\(0, 0, 0\).*rgb\(32, 58, 67\)/);
+  // Dark custom colours get light text automatically.
+  await expect(page.locator('header')).toHaveCSS('color', 'rgb(255, 255, 255)');
+  await page.reload();
+  await expect(page.getByTestId('app-background')).toHaveCSS('background-image', /rgb\(0, 0, 0\).*rgb\(32, 58, 67\)/);
+});

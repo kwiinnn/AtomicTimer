@@ -21,7 +21,7 @@ import { GraphPanel } from './stats/GraphPanel';
 import { DESKTOP_QUERY } from './layout/Shell';
 import { E2EHooks } from './state/E2EHooks';
 import { SettingsPage } from './settings/SettingsPage';
-import { ThemeDialog } from './settings/ThemeDialog';
+import { ThemePage } from './settings/ThemePage';
 import { AboutPage } from './about/AboutPage';
 import { ImportExportPage } from './io/ImportExportPage';
 import { BackupReminder } from './io/BackupReminder';
@@ -32,7 +32,7 @@ const scrambles = createScrambleService();
 
 function Themed() {
   const { settings, view } = useApp();
-  const page = view === 'settings' ? <SettingsPage /> : view === 'about' ? <AboutPage /> : view === 'io' ? <ImportExportPage /> : undefined;
+  const page = view === 'settings' ? <SettingsPage /> : view === 'about' ? <AboutPage /> : view === 'io' ? <ImportExportPage /> : view === 'theme' ? <ThemePage /> : undefined;
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
   const desktop = useMediaQuery(DESKTOP_QUERY, { noSsr: true });
   const resolved = useMemo(
@@ -53,7 +53,6 @@ function Themed() {
           stats={<StatsPane graph={!desktop} />}
           page={page}
         />
-        <ThemeDialog />
         <BackupReminder />
         <UpdatePrompt />
       </UndoProvider>

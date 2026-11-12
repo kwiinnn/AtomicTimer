@@ -6,7 +6,7 @@ import type { ScrambleService } from '../../platform/scramble';
 import type { AppStorage } from '../../platform/storage/types';
 import { t } from '../i18n';
 
-export type View = 'timer' | 'settings' | 'about' | 'io';
+export type View = 'timer' | 'settings' | 'about' | 'io' | 'theme';
 export type Picker = 'puzzle' | 'session' | null;
 export type SessionDialog = { kind: 'create'; puzzle?: PuzzleId } | { kind: 'rename' } | { kind: 'delete' } | null;
 
@@ -32,8 +32,6 @@ export interface AppState {
   closePicker(): void;
   sessionDialog: SessionDialog;
   setSessionDialog(d: SessionDialog): void;
-  themeDialogOpen: boolean;
-  setThemeDialogOpen(open: boolean): void;
 }
 
 const Ctx = createContext<AppState | null>(null);
@@ -73,7 +71,6 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
   const [view, setView] = useState<View>('timer');
   const [picker, setPicker] = useState<Picker>(null);
   const [sessionDialog, setSessionDialog] = useState<SessionDialog>(null);
-  const [themeDialogOpen, setThemeDialogOpen] = useState(false);
 
   const s = settings ?? DEFAULT_SETTINGS;
   const session = sessions?.find(x => x.id === s.currentSessionId) ?? sessions?.[0];
@@ -156,11 +153,9 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
       closePicker: () => setPicker(null),
       sessionDialog,
       setSessionDialog,
-      themeDialogOpen,
-      setThemeDialogOpen,
     }),
     [storage, scrambles, s, updateSettings, sessions, session, solves, selectSession, selectPuzzle, createSession,
-      setTimerBusy, view, picker, sessionDialog, themeDialogOpen],
+      setTimerBusy, view, picker, sessionDialog],
   );
 
   if (!settings || !sessions || !session) return <>{fallback ?? null}</>;

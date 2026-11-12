@@ -31,7 +31,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function SettingsPage() {
-  const { settings, updateSettings, setThemeDialogOpen } = useApp();
+  const { settings, updateSettings, setView } = useApp();
   const toggle = (key: BoolKey, label: MessageKey, help?: MessageKey) => (
     <ListItem>
       <FormControlLabel sx={{ width: '100%', mr: 0, justifyContent: 'space-between', ml: 0 }} labelPlacement="start"
@@ -82,7 +82,7 @@ export function SettingsPage() {
         <Section title={t('settings.appearance')}>
           {slider('settings.timerText', settings.timerTextScale, 0.5, 2, 0.1, v => void updateSettings({ timerTextScale: v }), v => `${Math.round(v * 100)}%`)}
           {slider('settings.scrambleText', settings.scrambleTextScale, 0.5, 2, 0.1, v => void updateSettings({ scrambleTextScale: v }), v => `${Math.round(v * 100)}%`)}
-          <ListItem><Button onClick={() => setThemeDialogOpen(true)}>{t('settings.theme')}</Button></ListItem>
+          <ListItem><Button onClick={() => setView('theme')}>{t('settings.theme')}</Button></ListItem>
         </Section>
         <Section title={t('settings.backup')}>
           {toggle('backupReminder', 'settings.backupReminder')}

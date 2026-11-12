@@ -1,7 +1,7 @@
 import { alpha, createTheme, lighten, type Components, type Theme } from '@mui/material/styles';
 import type { UiStyle } from '../../core/settings';
 import type { ResolvedTheme } from './resolve';
-import { FLOAT_SELECTOR, PAPER, STYLE_TOKENS } from './styles';
+import { PAPER, STYLE_TOKENS } from './styles';
 import { layerCss } from './surface';
 
 /**
@@ -27,15 +27,10 @@ function scrollbars(mode: 'light' | 'dark') {
   };
 }
 
-/** Glass-only global rules: no backdrop filters mid-solve, solid surfaces under reduced transparency. */
-function glassGlobals(mode: 'light' | 'dark') {
+/** Glass-only global rule: no backdrop filters mid-solve. (Reduced transparency is handled per surface in layerCss.) */
+function glassGlobals() {
   const off = { backdropFilter: 'none !important', WebkitBackdropFilter: 'none !important' };
-  return {
-    'body[data-timing="true"] *, body[data-timing="true"] *::before': off,
-    '@media (prefers-reduced-transparency: reduce)': {
-      [`${FLOAT_SELECTOR}, .MuiPaper-root`]: { ...off, backgroundColor: `${PAPER[mode]} !important`, backgroundImage: 'none !important' },
-    },
-  };
+  return { 'body[data-timing="true"] *, body[data-timing="true"] *::before': off };
 }
 
 /** Buttons, chips, toggles and thumbs in the style's control shape. */
@@ -54,14 +49,22 @@ function controls(style: UiStyle, r: ResolvedTheme, primary: string): Components
   if (control === 'flat') {
     return {
       MuiButton: { defaultProps: { disableElevation: true }, styleOverrides: { root: { boxShadow: 'none' } } },
-      MuiButtonBase: { defaultProps: { disableRipple: true } },
+      // No touch ripple, but keep the focus ripple: it is ButtonBase's only keyboard focus indicator.
+      MuiButtonBase: { defaultProps: { disableTouchRipple: true } },
     };
   }
   if (control === 'outlined') {
     return {
-      MuiButton: { styleOverrides: { contained: {
-        backgroundColor: 'transparent', color: primary, border: `1px solid ${primary}`, boxShadow: 'none',
-        '&:hover': { backgroundColor: alpha(primary, 0.08), boxShadow: 'none' },
+      MuiButton: { styleOverrides: { contained: ({ ownerState, theme }) => {
+        // Keep the button's own colour (a red Delete stays red).
+        const key = ownerState.color ?? 'primary';
+        const main = key === 'inherit' ? undefined : (theme.palette as unknown as Record<string, { main?: string } | undefined>)[key]?.main;
+        const c = main ?? 'currentColor';
+        return {
+          backgroundColor: 'transparent', color: c, border: `1px solid ${c}`, boxShadow: 'none',
+          '&:hover': { backgroundColor: main ? alpha(main, 0.08) : theme.palette.action.hover, boxShadow: 'none' },
+          '&.Mui-disabled': { backgroundColor: 'transparent', color: theme.palette.action.disabled, borderColor: theme.palette.action.disabledBackground },
+        };
       } } },
       MuiChip: { defaultProps: { variant: 'outlined' } },
     };
@@ -88,7 +91,18 @@ function styled(style: UiStyle, r: ResolvedTheme, primary: string): Components<T
     MuiPaper: { styleOverrides: { root: layerCss(style, 'content', r) } },
     MuiDialog: { styleOverrides: { paper: layerCss(style, 'overlay', r) } },
     MuiPopover: { styleOverrides: { paper: layerCss(style, 'overlay', r) } },
-    MuiDrawer: { styleOverrides: { paper: layerCss(style, 'overlay', r, { radius: `0 ${radius}px ${radius}px 0` }) } },
+    MuiDrawer: {
+      styleOverrides: {
+        // Rounded on the open side only, whichever edge the drawer comes from.
+        paper: {
+          ...layerCss(style, 'overlay', r),
+          '&.MuiDrawer-paperAnchorLeft': { borderRadius: `0 ${radius}px ${radius}px 0` },
+          '&.MuiDrawer-paperAnchorRight': { borderRadius: `${radius}px 0 0 ${radius}px` },
+          '&.MuiDrawer-paperAnchorTop': { borderRadius: `0 0 ${radius}px ${radius}px` },
+          '&.MuiDrawer-paperAnchorBottom': { borderRadius: `${radius}px ${radius}px 0 0` },
+        },
+      },
+    },
     MuiSnackbarContent: { styleOverrides: { root: layerCss(style, 'overlay', r) } },
     ...controls(style, r, primary),
     ...(style === 'glass' ? glassTabs(r) : {}),
@@ -128,7 +142,7 @@ export function makeTheme(r: ResolvedTheme, fontFamily: string, uiStyle: UiStyle
     uiStyle,
     resolved: r,
     components: {
-      MuiCssBaseline: { styleOverrides: { ...scrollbars(mode), ...(uiStyle === 'glass' ? glassGlobals(mode) : {}) } },
+      MuiCssBaseline: { styleOverrides: { ...scrollbars(mode), ...(uiStyle === 'glass' ? glassGlobals() : {}) } },
       // The toolbar floats on the theme gradient.
       MuiAppBar: {
         defaultProps: { color: 'transparent', enableColorOnDark: true, elevation: 0 },

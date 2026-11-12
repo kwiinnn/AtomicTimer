@@ -44,6 +44,9 @@ describe('text reads on every surface', () => {
   const customs: CustomTheme[] = [
     { from: '#fafafa', to: '#f0f0f0', accent: '#ff4081', angle: 0 },
     { from: '#000000', to: '#101010', accent: '#ff4081', angle: 0 },
+    // Mixed light-to-dark gradients: whichever ink is chosen fails on one end.
+    { from: '#fafafa', to: '#101010', accent: '#ff4081', angle: 0 },
+    { from: '#ffffff', to: '#000000', accent: '#ff4081', angle: 0 },
   ];
   const cases: { label: string; palette: PaletteChoice; customTheme: CustomTheme }[] = [
     ...PALETTE_IDS.map(palette => ({ label: palette, palette, customTheme: DEFAULT_SETTINGS.customTheme })),

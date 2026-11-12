@@ -66,7 +66,7 @@ export function SolveSheet({ solve, onClose }: { solve: Solve; onClose: () => vo
   return desktop ? (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">{body}</Dialog>
   ) : (
-    <Drawer anchor="bottom" open onClose={onClose} slotProps={{ paper: { sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 } } }}>
+    <Drawer anchor="bottom" open onClose={onClose} slotProps={{ paper: { sx: theme => (theme.uiStyle === 'material' ? { borderTopLeftRadius: 16, borderTopRightRadius: 16 } : {}) } }}>
       {body}
     </Drawer>
   );

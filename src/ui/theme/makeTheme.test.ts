@@ -31,13 +31,14 @@ test('glass floating layers reference the lens variable, content panels do not',
   expect(css(t.components!.MuiPaper!.styleOverrides)).toContain('blur(20px)');
 });
 
-test('glass adds timing and reduced-transparency rules', () => {
-  const glass = css(makeTheme(r, 'X', 'glass').components!.MuiCssBaseline!.styleOverrides);
-  expect(glass).toContain('body[data-timing=\\"true\\"]');
-  expect(glass).toContain('prefers-reduced-transparency');
-  const material = css(makeTheme(r, 'X').components!.MuiCssBaseline!.styleOverrides);
-  expect(material).not.toContain('data-timing');
-  expect(material).not.toContain('prefers-reduced-transparency');
+test('glass adds the timing rule globally and reduced transparency per surface', () => {
+  const glass = makeTheme(r, 'X', 'glass').components!;
+  expect(css(glass.MuiCssBaseline!.styleOverrides)).toContain('body[data-timing=\\"true\\"]');
+  expect(css(glass.MuiPaper!.styleOverrides)).toContain('prefers-reduced-transparency');
+  expect(css(glass.MuiAppBar!.styleOverrides)).toContain('prefers-reduced-transparency');
+  const material = makeTheme(r, 'X').components!;
+  expect(css(material.MuiCssBaseline!.styleOverrides)).not.toContain('data-timing');
+  expect(css(material)).not.toContain('prefers-reduced-transparency');
 });
 
 test('brutalist draws heavy borders and hard shadows', () => {
@@ -60,4 +61,46 @@ test('surfaceSx follows other styles', () => {
 test('surfaceSx radius is in px, not theme spacing units', () => {
   // sx multiplies bare numbers by shape.borderRadius, so the radius must be an explicit px string.
   expect(surfaceSx('content')(makeTheme(r, 'X', 'glass'))).toMatchObject({ borderRadius: '24px' });
+});
+
+// --- Final review fixes ---
+
+test('snackbar text uses the ink colour in every style', () => {
+  for (const s of UI_STYLE_IDS.filter(s => s !== 'material')) {
+    for (const mode of ['light', 'dark'] as const) {
+      const rr = resolveTheme({ palette: 'indigo', customTheme: DEFAULT_SETTINGS.customTheme, themeMode: mode }, false);
+      expect(makeTheme(rr, 'X', s).components!.MuiSnackbarContent!.styleOverrides!.root, `${s}/${mode}`).toMatchObject({ color: rr.ink });
+    }
+  }
+});
+
+test('flat keeps the keyboard focus ripple', () => {
+  const base = makeTheme(r, 'X', 'flat').components!.MuiButtonBase!.defaultProps!;
+  expect(base.disableRipple).toBeFalsy();
+  expect(base.disableTouchRipple).toBe(true);
+});
+
+test('outline keeps each button colour (error stays red)', () => {
+  const t = makeTheme(r, 'X', 'outline');
+  const contained = t.components!.MuiButton!.styleOverrides!.contained as (p: { ownerState: { color?: string }; theme: typeof t }) => Record<string, unknown>;
+  expect(contained({ ownerState: { color: 'error' }, theme: t })).toMatchObject({ color: t.palette.error.main, border: `1px solid ${t.palette.error.main}` });
+  expect(contained({ ownerState: { color: 'primary' }, theme: t })).toMatchObject({ color: t.palette.primary.main });
+  expect(contained({ ownerState: { color: 'inherit' }, theme: t })).toMatchObject({ color: 'currentColor' });
+});
+
+test('drawer corners follow its anchor', () => {
+  const paper = css(makeTheme(r, 'X', 'glass').components!.MuiDrawer!.styleOverrides!.paper);
+  expect(paper).toContain('"&.MuiDrawer-paperAnchorBottom":{"borderRadius":"24px 24px 0 0"}');
+  expect(paper).toContain('"&.MuiDrawer-paperAnchorLeft":{"borderRadius":"0 24px 24px 0"}');
+});
+
+test('reduced transparency is part of every glass surface, not only Papers', () => {
+  const pane = css(surfaceSx('content', { edge: 'right' })(makeTheme(r, 'X', 'glass')));
+  expect(pane).toContain('@media (prefers-reduced-transparency: reduce)');
+  expect(pane).toContain('"backdropFilter":"none"');
+});
+
+test('glass bars blur more where the lens is unavailable', () => {
+  // LensLayer lowers --glass-lens-blur to 3px only where the lens renders; elsewhere the frost stays at 12px.
+  expect(css(makeTheme(r, 'X', 'glass').components!.MuiAppBar!.styleOverrides)).toContain('blur(var(--glass-lens-blur, 12px))');
 });

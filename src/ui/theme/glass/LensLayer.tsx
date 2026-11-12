@@ -1,8 +1,21 @@
 import { useEffect, useState } from 'react';
-import { FLOAT_SELECTOR } from '../styles';
+import { FLOAT_SELECTOR, STYLE_TOKENS } from '../styles';
 import { LENS_SCALE, lensFor, lensMap, supportsLens, type Lens } from './lens';
 
 const sameIds = (a: Map<string, Lens>, b: Map<string, Lens>) => a.size === b.size && [...a.keys()].every(k => b.has(k));
+const ELEMENT = 1;
+
+/**
+ * Only elements mounting/unmounting can add or remove a floating surface — not text changes, which the
+ * running timer makes every frame. While timing (glass filters are off anyway) even those wait; the
+ * timing flag flipping back triggers one catch-up resync.
+ */
+export function shouldResync(records: MutationRecord[], timing: boolean): boolean {
+  if (records.some(r => r.type === 'attributes')) return true;
+  if (timing) return false;
+  const hasElement = (nodes: NodeList | Node[]) => Array.prototype.some.call(nodes, (n: Node) => n.nodeType === ELEMENT);
+  return records.some(r => hasElement(r.addedNodes) || hasElement(r.removedNodes));
+}
 
 /**
  * Gives every floating surface a lens filter sized to it (Chromium, Liquid Glass only) through `--lens`,
@@ -12,6 +25,9 @@ export function LensLayer({ enabled }: { enabled: boolean }) {
   const [lenses, setLenses] = useState<Map<string, Lens>>(() => new Map());
   useEffect(() => {
     if (!enabled || !supportsLens() || matchMedia('(prefers-reduced-transparency: reduce)').matches) return;
+    // Heavier blur erases the lens, so bars frost lightly only where the lens renders (12px elsewhere).
+    const root = document.documentElement.style;
+    root.setProperty('--glass-lens-blur', `${STYLE_TOKENS.glass.float.lensBlurPx}px`);
     const tracked = new Map<HTMLElement, string>();
     let frame = 0;
     const sync = () => {
@@ -42,14 +58,17 @@ export function LensLayer({ enabled }: { enabled: boolean }) {
       if (!frame) frame = requestAnimationFrame(sync);
     };
     const resize = new ResizeObserver(schedule);
-    const mutations = new MutationObserver(schedule);
-    mutations.observe(document.body, { childList: true, subtree: true });
+    const mutations = new MutationObserver(records => {
+      if (shouldResync(records, document.body.dataset.timing === 'true')) schedule();
+    });
+    mutations.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-timing'] });
     schedule();
     return () => {
       cancelAnimationFrame(frame);
       resize.disconnect();
       mutations.disconnect();
       for (const el of tracked.keys()) el.style.removeProperty('--lens');
+      root.removeProperty('--glass-lens-blur');
       setLenses(new Map());
     };
   }, [enabled]);

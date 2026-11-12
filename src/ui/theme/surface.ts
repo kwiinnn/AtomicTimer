@@ -2,7 +2,7 @@ import { alpha, type Theme } from '@mui/material/styles';
 import type { CSSObject } from '@mui/material/styles';
 import type { UiStyle } from '../../core/settings';
 import type { ResolvedTheme } from './resolve';
-import { STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
+import { fillAlpha, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
 
 export interface LayerOptions {
   /** A surface docked to the screen edge (toolbar, side pane): square, bordered on that edge only, no shadow. */
@@ -22,7 +22,8 @@ const px = (v: string | number) => (typeof v === 'number' ? `${v}px` : v);
 export function layerCss(style: UiStyle, kind: SurfaceKind, r: ResolvedTheme, opts: LayerOptions = {}): CSSObject {
   const tokens = STYLE_TOKENS[style];
   const layer = tokens[kind];
-  const backdrop = layer.blurPx > 0 ? `${layer.lens ? 'var(--lens,) ' : ''}blur(${layer.blurPx}px) saturate(${layer.saturate})` : 'none';
+  const blur = layer.lensBlurPx === undefined ? `${layer.blurPx}px` : `var(--glass-lens-blur, ${layer.blurPx}px)`;
+  const backdrop = layer.blurPx > 0 ? `${layer.lens ? 'var(--lens,) ' : ''}blur(${blur}) saturate(${layer.saturate})` : 'none';
   const line = {
     none: 'none',
     hairline: `1px solid ${alpha(r.ink, 0.2)}`,
@@ -36,7 +37,9 @@ export function layerCss(style: UiStyle, kind: SurfaceKind, r: ResolvedTheme, op
     hard: `4px 4px 0 ${r.ink}`,
   }[tokens.shadow];
   const css: CSSObject = {
-    backgroundColor: alpha(surfaceBase(style, kind, r), layer.fillAlpha),
+    backgroundColor: alpha(surfaceBase(style, kind, r), fillAlpha(style, kind, r)),
+    // MUI derives some surfaces' text colour from their default background (SnackbarContent); ours changed.
+    color: r.ink,
     backgroundImage: style === 'glass' ? sheen(r.mode) : 'none',
     backgroundAttachment: style === 'glass' ? 'fixed' : undefined,
     backdropFilter: backdrop,
@@ -48,6 +51,11 @@ export function layerCss(style: UiStyle, kind: SurfaceKind, r: ResolvedTheme, op
   };
   if (opts.edge === 'bottom') css.borderBottom = line === 'none' ? `1px solid ${alpha(r.ink, 0.12)}` : line;
   if (opts.edge === 'right') css.borderRight = line === 'none' ? `1px solid ${alpha(r.ink, 0.12)}` : line;
+  if (style === 'glass') {
+    css['@media (prefers-reduced-transparency: reduce)'] = {
+      backgroundColor: surfaceBase(style, kind, r), backgroundImage: 'none', backdropFilter: 'none', WebkitBackdropFilter: 'none',
+    };
+  }
   return css;
 }
 

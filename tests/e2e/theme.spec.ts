@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { join } from 'node:path';
 import { waitForSavedSettings } from './helpers/db';
-import { ready } from './helpers/solve';
+import { keyboardSolve, ready } from './helpers/solve';
 
 const bgImage = (page: import('@playwright/test').Page, testId: string) =>
   page.getByTestId(testId).evaluate(el => getComputedStyle(el).backgroundImage);
@@ -280,7 +280,7 @@ test.describe('on Safari', () => {
   test('glass stays frosted without the lens', async ({ page }) => {
     await page.addInitScript(() => Object.defineProperty(navigator, 'userAgentData', { get: () => undefined }));
     await pickGlass(page);
-    await expect(page.locator('header')).toHaveCSS('backdrop-filter', /blur\(3px\)/);
+    await expect(page.locator('header')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
     await expect(page.locator('header')).not.toHaveCSS('backdrop-filter', /url/);
   });
 });
@@ -309,4 +309,29 @@ test('touch devices keep highlights still', async ({ page, isMobile }) => {
   await page.evaluate(() => window.dispatchEvent(new PointerEvent('pointermove', { clientX: 100, clientY: 300, pointerType: 'touch' })));
   await page.waitForTimeout(300);
   expect(await glassX(page)).toBe('');
+});
+
+test('the lens gets a light blur where it renders', async ({ page }) => {
+  await pickGlass(page);
+  await expect(page.locator('header')).toHaveCSS('backdrop-filter', /url\("?#lens-[^)]*\) blur\(3px\)/);
+});
+
+test('reduced transparency also makes the desktop side pane solid', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop side pane');
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }] });
+  await pickGlass(page);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.locator('aside')).toHaveCSS('backdrop-filter', 'none');
+});
+
+test('snackbars stay readable in glass', async ({ page }) => {
+  await pickGlass(page);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+  await keyboardSolve(page);
+  await page.getByTestId('quick-delete').click();
+  await expect(page.locator('.MuiSnackbarContent-root')).toHaveCSS('color', 'rgb(31, 31, 31)');
 });

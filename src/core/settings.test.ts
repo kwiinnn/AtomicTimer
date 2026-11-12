@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { APP_FONT_IDS, DEFAULT_SETTINGS, migrateSettings, TIMER_FONT_IDS } from './settings';
+import { APP_FONT_IDS, DEFAULT_SETTINGS, migrateSettings, TIMER_FONT_IDS, UI_STYLE_IDS } from './settings';
 
 test('defaults match the spec', () => {
   expect(DEFAULT_SETTINGS).toMatchObject({
@@ -67,4 +67,14 @@ test('app font rejects display-only faces; timer accepts "same as app"', () => {
   expect(migrateSettings({ appFont: 'anthropic' }).appFont).toBe('quicksand');
   expect(migrateSettings({ timerFont: 'app' }).timerFont).toBe('app');
   expect(migrateSettings({ timerFont: 'sourceSerif' }).timerFont).toBe('sourceSerif');
+});
+
+test('uiStyle defaults to material and existing settings migrate to it', () => {
+  expect(DEFAULT_SETTINGS.uiStyle).toBe('material');
+  expect(migrateSettings({ palette: 'teal' }).uiStyle).toBe('material');
+});
+test('uiStyle accepts every style and rejects others', () => {
+  for (const id of UI_STYLE_IDS) expect(migrateSettings({ uiStyle: id }).uiStyle).toBe(id);
+  expect(migrateSettings({ uiStyle: 'neumorphic' }).uiStyle).toBe('material');
+  expect(UI_STYLE_IDS).toEqual(['material', 'glass', 'flat', 'outline', 'brutalist']);
 });

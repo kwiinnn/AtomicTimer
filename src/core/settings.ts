@@ -29,6 +29,9 @@ export const APP_FONT_IDS: FontId[] = FONT_IDS.filter(id => id !== 'digital' && 
 /** A catalogue font, or 'app' to follow the app font. */
 export type TimerFontId = FontId | 'app';
 export const TIMER_FONT_IDS: TimerFontId[] = ['app', ...FONT_IDS];
+/** How surfaces are drawn; independent of palette and fonts. */
+export type UiStyle = 'material' | 'glass' | 'flat' | 'outline' | 'brutalist';
+export const UI_STYLE_IDS: UiStyle[] = ['material', 'glass', 'flat', 'outline', 'brutalist'];
 
 export interface CustomTheme {
   /** Gradient start and end colours, #rrggbb. */
@@ -64,6 +67,8 @@ export interface Settings {
   timerFont: TimerFontId;
   /** Font for the whole interface. */
   appFont: FontId;
+  /** How surfaces are drawn; independent of palette and fonts. */
+  uiStyle: UiStyle;
   backupReminder: boolean;
   lastBackupAt: number | null;
   currentSessionId: string | null;
@@ -90,6 +95,7 @@ export const DEFAULT_SETTINGS: Settings = {
   backgroundDim: 0.4,
   timerFont: 'quicksand',
   appFont: 'quicksand',
+  uiStyle: 'material',
   backupReminder: true,
   lastBackupAt: null,
   currentSessionId: null,
@@ -101,6 +107,7 @@ const ENUMS: Partial<Record<keyof Settings, readonly unknown[]>> = {
   palette: [...PALETTE_IDS, 'custom'],
   timerFont: TIMER_FONT_IDS,
   appFont: APP_FONT_IDS,
+  uiStyle: UI_STYLE_IDS,
 };
 
 /** '#abc' / '#AABBCC' → '#aabbcc'; anything else → null. */

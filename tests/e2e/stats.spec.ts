@@ -54,6 +54,8 @@ test('phone timer shows quick stats bottom-left', async ({ page, isMobile }) => 
   const vp = page.viewportSize()!;
   expect(box.x).toBeLessThan(vp.width / 2);
   expect(box.y + box.height).toBeGreaterThan(vp.height * 0.7);
+  // Not cramped: room between the labels and the numbers.
+  expect(box.width).toBeGreaterThanOrEqual(150);
   // The phone scramble image keeps its phone size.
   expect((await page.getByTestId('scramble-image').boundingBox())!.height).toBeLessThanOrEqual(112);
 });

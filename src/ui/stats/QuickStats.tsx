@@ -21,8 +21,8 @@ export function QuickStats() {
     ['count', t('stats.count'), String(stats.count)],
   ];
   return (
-    <Box data-testid="quick-stats" className="phone-card" sx={[{ display: 'inline-grid', gridTemplateColumns: 'auto auto', columnGap: 1.5,
-      rowGap: 0.25, fontVariantNumeric: 'tabular-nums' }, phoneCardSx(8)]}>
+    <Box data-testid="quick-stats" className="phone-card" sx={[{ display: 'inline-grid', gridTemplateColumns: 'auto auto', columnGap: 3,
+      rowGap: 0.5, minWidth: 160, fontVariantNumeric: 'tabular-nums' }, phoneCardSx('12px 16px')]}>
       {rows.map(([id, label, value]) => (
         <Box key={id} sx={{ display: 'contents' }}>
           <Typography variant="body2" color="text.secondary">{label}</Typography>

@@ -12,7 +12,7 @@ import { DESKTOP_QUERY } from '../layout/Shell';
 import { useApp } from '../state/AppContext';
 import { SolveSheet } from './SolveSheet';
 import { useSessionStats } from '../stats/useSessionStats';
-import { phoneCardSx } from '../theme/surface';
+import { tileDepthSx } from '../theme/surface';
 
 /** Rows rendered per page; more are added when the "show more" sentinel scrolls into view. */
 export const PAGE = 100;
@@ -46,8 +46,8 @@ const Row = memo(function Row({ solve, number, desktop, thousandths, ao5, ao12, 
   }
   return (
     <ButtonBase data-testid="solve-row" onClick={() => onOpen(solve.id)}
-      sx={{ borderRadius: 1, px: 1.5, py: 1, bgcolor: 'action.hover', justifyContent: desktop ? 'space-between' : 'center', gap: 1,
-        fontVariantNumeric: 'tabular-nums' }}>
+      sx={[{ borderRadius: 1, px: 1.5, py: 1, bgcolor: 'action.hover', justifyContent: desktop ? 'space-between' : 'center', gap: 1,
+        fontVariantNumeric: 'tabular-nums' }, tileDepthSx]}>
       {desktop && (
         <Typography component="span" variant="body2" color="text.secondary" aria-hidden>{number}</Typography>
       )}
@@ -97,9 +97,7 @@ export function TimesList() {
           <span style={{ textAlign: 'left' }}>#</span><span>{t('times.time')}</span><span>ao5</span><span>ao12</span>
         </Box>
       )}
-      <Box className={!desktop && visible.length > 0 ? 'phone-card' : undefined}
-        sx={[{ display: 'grid', gap: desktop ? 0 : 0.75, gridTemplateColumns: desktop ? '1fr' : 'repeat(auto-fill, minmax(104px, 1fr))' },
-          !desktop && visible.length > 0 && phoneCardSx(8)]}>
+      <Box sx={{ display: 'grid', gap: desktop ? 0 : 0.75, gridTemplateColumns: desktop ? '1fr' : 'repeat(auto-fill, minmax(104px, 1fr))' }}>
         {visible.map((s, i) => {
           const index = solves.length - 1 - i;
           return (

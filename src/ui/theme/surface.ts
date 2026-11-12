@@ -2,7 +2,7 @@ import { alpha, type Theme } from '@mui/material/styles';
 import type { CSSObject } from '@mui/material/styles';
 import type { UiStyle } from '../../core/settings';
 import type { ResolvedTheme } from './resolve';
-import { fillAlpha, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
+import { fillAlpha, PAPER, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
 
 export interface LayerOptions {
   /** A surface docked to the screen edge (toolbar, side pane): square, bordered on that edge only, no shadow. */
@@ -74,7 +74,18 @@ export function surfaceSx(kind: SurfaceKind, opts: LayerOptions & { materialAlph
  * phone panes otherwise sit straight on the background photo. Desktop content already sits on a frosted pane.
  * A few large cards rather than one per time tile keeps scrolling cheap.
  */
-export function phoneCardSx(padding = 0): (theme: Theme) => CSSObject {
+export function phoneCardSx(padding: number | string = 0): (theme: Theme) => CSSObject {
   // px strings: sx reads bare numbers for margin/padding as theme spacing units (8 → 64px).
-  return theme => (theme.uiStyle === 'glass' ? { ...layerCss('glass', 'content', theme.resolved), margin: '8px', padding: `${padding}px` } : {});
+  return theme => (theme.uiStyle === 'glass' ? { ...layerCss('glass', 'content', theme.resolved), margin: '8px', padding: px(padding) } : {});
+}
+
+/** Glass time tiles: a little depth (darker translucent fill, light top edge, soft shadow) without a blur per tile. */
+export function tileDepthSx(theme: Theme): CSSObject {
+  if (theme.uiStyle !== 'glass') return {};
+  const r = theme.resolved;
+  return {
+    backgroundColor: alpha(PAPER[r.mode], r.mode === 'dark' ? 0.42 : 0.5),
+    border: `1px solid ${alpha(r.ink, 0.14)}`,
+    boxShadow: `0 4px 14px rgba(0, 0, 0, 0.28), inset 0 1px 0 ${alpha('#ffffff', 0.18)}`,
+  };
 }

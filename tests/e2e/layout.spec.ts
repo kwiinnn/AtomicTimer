@@ -148,7 +148,7 @@ async function glassPhoneWithSolves(page: Page) {
   await expect(page.locator('.MuiModal-root')).toHaveCount(0);
 }
 
-test('in glass, phone stats sections and the times grid sit on frosted cards', async ({ page, isMobile }) => {
+test('in glass, phone stats sections sit on frosted cards; time tiles get depth, not a card', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'phone layout only');
   await glassPhoneWithSolves(page);
   await page.getByRole('tab', { name: 'Stats' }).click();
@@ -156,7 +156,20 @@ test('in glass, phone stats sections and the times grid sit on frosted cards', a
   await expect(statsCards).toHaveCount(2); // session table + graph
   for (const card of await statsCards.all()) await expect(card).toHaveCSS('backdrop-filter', /blur\(20px\)/);
   await page.getByRole('tab', { name: 'Times' }).click();
-  await expect(page.getByTestId('times-list').locator('.phone-card')).toHaveCSS('backdrop-filter', /blur\(20px\)/);
+  await expect(page.getByTestId('times-list').locator('.phone-card')).toHaveCount(0);
+  const tile = page.getByTestId('solve-row').first();
+  await expect(tile).toHaveCSS('box-shadow', /rgba\(0, 0, 0/);
+  await expect(tile).toHaveCSS('backdrop-filter', 'none');
+});
+
+test('the phone stats graph is always shown, with no Graph toggle', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await page.goto('/?e2e=1');
+  await page.waitForFunction(() => typeof window.__seed === 'function');
+  await page.evaluate(() => window.__seed!([12000, 13000, 14000]));
+  await page.getByRole('tab', { name: 'Stats' }).click();
+  await expect(page.getByTestId('stats-pane').getByTestId('time-graph')).toBeVisible();
+  await expect(page.getByTestId('stats-pane').getByRole('button', { name: 'Graph' })).toHaveCount(0);
 });
 
 test('phone cards stay bare outside glass', async ({ page, isMobile }) => {

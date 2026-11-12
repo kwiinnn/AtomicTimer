@@ -78,13 +78,14 @@ export function AppProvider({ storage, scrambles, children, fallback }: {
 
   const updateSettings = useCallback(
     async (patch: Partial<Settings>) => {
-      const base = latest.current ?? (await storage.getSettings());
+      // Start from what is already on screen so the change shows at once (no storage read first).
+      const base = latest.current ?? settings ?? (await storage.getSettings());
       const next = { ...base, ...patch };
       latest.current = next;
       setLocal(next);
       await storage.putSettings(next);
     },
-    [storage],
+    [storage, settings],
   );
 
   const createSession = useCallback(

@@ -23,7 +23,7 @@ type BoolKey = { [K in keyof Settings]: Settings[K] extends boolean ? K : never 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Paper variant="outlined" sx={{ mb: 2 }}>
-      <List subheader={<ListSubheader sx={{ bgcolor: 'transparent', color: 'primary.main', fontWeight: 700 }}>{title}</ListSubheader>}>
+      <List subheader={<ListSubheader disableSticky sx={{ bgcolor: 'transparent', color: 'primary.main', fontWeight: 700 }}>{title}</ListSubheader>}>
         {children}
       </List>
     </Paper>

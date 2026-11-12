@@ -44,3 +44,9 @@ test('about credits the inspirations and licenses', async ({ page }) => {
   await expect(page.getByRole('main')).toContainText('Twisty Timer');
   await expect(page.getByRole('main')).toContainText('MPL-2.0');
 });
+
+test('section titles scroll with the page instead of sticking over the rows', async ({ page }) => {
+  await nav(page, 'Settings');
+  // MUI list subheaders are sticky by default; with a transparent background they overlapped the rows.
+  await expect(page.locator('.MuiListSubheader-root', { hasText: /^Inspection$/ })).toHaveCSS('position', 'static');
+});

@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
 import { t, type MessageKey } from '../i18n';
 import { useApp, type View } from '../state/AppContext';
-import { PALETTES } from '../theme/palettes';
+import { primaryOf } from '../theme/palettes';
 
 /** Views and dialogs that exist so far; later features register here. */
 export const ENABLED_NAV = new Set<string>(['timer', 'theme', 'io', 'settings', 'about']);
@@ -31,7 +31,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
   return (
     <Drawer open={open} onClose={onClose}>
       <Box sx={{ width: 280 }} role="navigation">
-        <Box sx={{ bgcolor: PALETTES[settings.palette].primary, color: '#fff', px: 2, py: 4 }}>
+        <Box sx={{ bgcolor: primaryOf(settings), color: '#fff', px: 2, py: 4 }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('appName')}</Typography>
         </Box>
         <List>

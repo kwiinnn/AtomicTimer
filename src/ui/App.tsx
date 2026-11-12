@@ -11,6 +11,7 @@ import { t } from './i18n';
 import { Shell } from './layout/Shell';
 import { AppProvider, useApp } from './state/AppContext';
 import { makeTheme } from './theme/makeTheme';
+import { colorsOf } from './theme/palettes';
 import { TimerPane } from './timer/TimerPane';
 import { TimesList } from './times/TimesList';
 import { UndoProvider } from './components/UndoSnackbar';
@@ -34,7 +35,8 @@ function Themed() {
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
   const desktop = useMediaQuery(DESKTOP_QUERY, { noSsr: true });
   const mode = settings.themeMode === 'system' ? (systemDark ? 'dark' : 'light') : settings.themeMode;
-  const theme = useMemo(() => makeTheme(mode, settings.palette), [mode, settings.palette]);
+  const { primary, secondary } = colorsOf(settings);
+  const theme = useMemo(() => makeTheme(mode, { primary, secondary }), [mode, primary, secondary]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

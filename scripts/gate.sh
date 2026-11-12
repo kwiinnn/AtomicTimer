@@ -3,4 +3,4 @@
 set -euo pipefail
 npm run -s typecheck
 npm run -s lint
-npx vitest run "$@" 2>&1 | tail -4
+npx vitest run "$@" 2>&1 | grep -E "Tests |Test Files|×"

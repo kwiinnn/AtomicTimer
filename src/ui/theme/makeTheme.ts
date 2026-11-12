@@ -1,11 +1,8 @@
 import { createTheme, lighten, type Theme } from '@mui/material/styles';
-import type { PaletteId } from '../../core/settings';
-import { PALETTES } from './palettes';
 
 export const TIMER_FONT = '"Quicksand", system-ui, sans-serif';
 
-export function makeTheme(mode: 'light' | 'dark', palette: PaletteId): Theme {
-  const p = PALETTES[palette];
+export function makeTheme(mode: 'light' | 'dark', p: { primary: string; secondary: string }): Theme {
   return createTheme({
     palette: {
       mode,

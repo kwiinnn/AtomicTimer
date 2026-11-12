@@ -284,3 +284,29 @@ test.describe('on Safari', () => {
     await expect(page.locator('header')).not.toHaveCSS('backdrop-filter', /url/);
   });
 });
+
+const glassX = (page: import('@playwright/test').Page) => page.evaluate(() => document.documentElement.style.getPropertyValue('--glass-x'));
+
+test('highlights follow the mouse on desktop', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'pointer devices only');
+  await pickGlass(page);
+  await page.mouse.move(300, 200);
+  await expect.poll(() => glassX(page)).toBe('300px');
+});
+
+test('reduced motion keeps highlights still', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'pointer devices only');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await pickGlass(page);
+  await page.mouse.move(300, 200);
+  await page.waitForTimeout(300);
+  expect(await glassX(page)).toBe('');
+});
+
+test('touch devices keep highlights still', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'touch devices only');
+  await pickGlass(page);
+  await page.evaluate(() => window.dispatchEvent(new PointerEvent('pointermove', { clientX: 100, clientY: 300, pointerType: 'touch' })));
+  await page.waitForTimeout(300);
+  expect(await glassX(page)).toBe('');
+});

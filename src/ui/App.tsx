@@ -14,6 +14,7 @@ import { makeTheme } from './theme/makeTheme';
 import { resolveTheme } from './theme/resolve';
 import { AppBackground, glassBlobs, themeVars } from './theme/AppBackground';
 import { LensLayer } from './theme/glass/LensLayer';
+import { useGlassHighlight } from './theme/glass/useGlassHighlight';
 import { useBackgroundImageUrl } from './theme/useBackgroundImage';
 import { ensureFont, FONTS, timerFamily } from './theme/fonts';
 import { TimerPane } from './timer/TimerPane';
@@ -46,6 +47,7 @@ function Themed() {
   const theme = useMemo(() => makeTheme(resolved, appFamily, settings.uiStyle), [resolved, appFamily, settings.uiStyle]);
   const imageUrl = useBackgroundImageUrl();
   const image = imageUrl ? { url: imageUrl, dim: settings.backgroundDim } : null;
+  useGlassHighlight(settings.uiStyle === 'glass');
   useEffect(() => ensureFont(settings.timerFont), [settings.timerFont]);
   useEffect(() => ensureFont(settings.appFont), [settings.appFont]);
   return (

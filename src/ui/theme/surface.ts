@@ -1,8 +1,8 @@
-import { alpha, type Theme } from '@mui/material/styles';
+import { alpha, lighten, type Theme } from '@mui/material/styles';
 import type { CSSObject } from '@mui/material/styles';
 import type { UiStyle } from '../../core/settings';
 import type { ResolvedTheme } from './resolve';
-import { fillAlpha, PAPER, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
+import { fillAlpha, STYLE_TOKENS, surfaceBase, type SurfaceKind } from './styles';
 
 export interface LayerOptions {
   /** A surface docked to the screen edge (toolbar, side pane): square, bordered on that edge only, no shadow. */
@@ -79,13 +79,13 @@ export function phoneCardSx(padding: number | string = 0): (theme: Theme) => CSS
   return theme => (theme.uiStyle === 'glass' ? { ...layerCss('glass', 'content', theme.resolved), margin: '8px', padding: px(padding) } : {});
 }
 
-/** Glass time tiles: a little depth (darker translucent fill, light top edge, soft shadow) without a blur per tile. */
+/** Glass time tiles: tinted with the theme colour, with a little depth (light top edge, soft shadow) and no per-tile blur. */
 export function tileDepthSx(theme: Theme): CSSObject {
   if (theme.uiStyle !== 'glass') return {};
   const r = theme.resolved;
   return {
-    backgroundColor: alpha(PAPER[r.mode], r.mode === 'dark' ? 0.42 : 0.5),
-    border: `1px solid ${alpha(r.ink, 0.14)}`,
+    backgroundColor: alpha(r.primary, r.mode === 'dark' ? 0.38 : 0.22),
+    border: `1px solid ${alpha(lighten(r.primary, 0.4), 0.4)}`,
     boxShadow: `0 4px 14px rgba(0, 0, 0, 0.28), inset 0 1px 0 ${alpha('#ffffff', 0.18)}`,
   };
 }

@@ -180,3 +180,45 @@ test('phone cards stay bare outside glass', async ({ page, isMobile }) => {
   await page.getByRole('tab', { name: 'Stats' }).click();
   await expect(page.getByTestId('stats-pane').locator('.phone-card').first()).toHaveCSS('backdrop-filter', 'none');
 });
+
+test('in glass, phone panes scroll under the toolbar and the tab pill', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await glassPhoneWithSolves(page);
+  const header = (await page.locator('header').boundingBox())!;
+  const strip = (await page.locator('.glass-tabs').boundingBox())!;
+  expect(strip.y).toBeGreaterThanOrEqual(header.y + header.height); // pill still sits under the toolbar
+  for (const tab of ['Stats', 'Times']) {
+    await page.getByRole('tab', { name: tab }).click();
+    const panel = page.getByRole('tabpanel').nth(tab === 'Times' ? 1 : 2);
+    const box = (await panel.boundingBox())!;
+    // The scrolling pane reaches the top of the screen, so content passes under both glass bars…
+    expect(box.y).toBeLessThanOrEqual(header.y);
+    // …and starts below the pill, so nothing is hidden at rest.
+    const pad = await panel.evaluate(el => parseFloat(getComputedStyle(el).paddingTop));
+    expect(box.y + pad).toBeGreaterThanOrEqual(strip.y + strip.height);
+  }
+});
+
+test('nothing above a frosted phone card blocks its blur', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await glassPhoneWithSolves(page);
+  await page.getByRole('tab', { name: 'Stats' }).click();
+  // A mask, filter or opacity on an ancestor makes it a backdrop root: the card would blur nothing.
+  const blockers = await page.getByTestId('stats-pane').locator('.phone-card').first().evaluate(card => {
+    const out: string[] = [];
+    for (let el = card.parentElement; el; el = el.parentElement) {
+      const cs = getComputedStyle(el);
+      if (cs.maskImage !== 'none' || cs.filter !== 'none' || Number(cs.opacity) < 1) out.push(el.tagName + '.' + el.className);
+    }
+    return out;
+  });
+  expect(blockers).toEqual([]);
+});
+
+test('in glass, time tiles take the theme colour', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await glassPhoneWithSolves(page);
+  await page.getByRole('tab', { name: 'Times' }).click();
+  // Default palette is indigo (#3f51b5 → rgb 63, 81, 181).
+  await expect(page.getByTestId('solve-row').first()).toHaveCSS('background-color', /^rgba\(63, 81, 181, 0\.\d+\)$/);
+});

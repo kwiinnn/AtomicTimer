@@ -27,10 +27,32 @@ function scrollbars(mode: 'light' | 'dark') {
   };
 }
 
-/** Glass-only global rule: no backdrop filters mid-solve. (Reduced transparency is handled per surface in layerCss.) */
+const FLOW_MS = 520;
+const SPRING = 'cubic-bezier(0.34, 1.45, 0.5, 1)';
+
+/** A droplet's stretch as the tab capsule moves: elongate, overshoot slightly thin, settle. */
+const flow = {
+  '0%': { transform: 'none' },
+  '35%': { transform: 'scaleX(1.28) scaleY(0.86)' },
+  '70%': { transform: 'scaleX(0.96) scaleY(1.04)' },
+  '100%': { transform: 'none' },
+};
+
+/**
+ * Glass-only global rules: no backdrop filters mid-solve (reduced transparency is handled per surface in
+ * layerCss), and the tab capsule's flow. MobileTabs flips data-flow between "a" and "b" on every switch,
+ * so the animation name changes and restarts.
+ */
 function glassGlobals() {
   const off = { backdropFilter: 'none !important', WebkitBackdropFilter: 'none !important' };
-  return { 'body[data-timing="true"] *, body[data-timing="true"] *::before': off };
+  return {
+    'body[data-timing="true"] *, body[data-timing="true"] *::before': off,
+    '@keyframes glass-flow-a': flow,
+    '@keyframes glass-flow-b': flow,
+    '.glass-tabs[data-flow="a"] .MuiTabs-indicator': { animation: `glass-flow-a ${FLOW_MS}ms ease-out` },
+    '.glass-tabs[data-flow="b"] .MuiTabs-indicator': { animation: `glass-flow-b ${FLOW_MS}ms ease-out` },
+    '@media (prefers-reduced-motion: reduce)': { '.glass-tabs .MuiTabs-indicator': { animation: 'none !important' } },
+  };
 }
 
 /** Buttons, chips, toggles and thumbs in the style's control shape. */
@@ -114,10 +136,26 @@ function glassTabs(r: ResolvedTheme): Components<Theme> {
     MuiTabs: {
       styleOverrides: {
         root: { ...layerCss('glass', 'float', r, { radius: 999 }), margin: '8px 12px', minHeight: 44 },
-        indicator: { height: 'calc(100% - 8px)', top: 4, borderRadius: 999, backgroundColor: alpha(r.ink, 0.14), zIndex: 0 },
+        indicator: {
+          // A transparent 4px border clipped off insets the capsule from the pill's edge on every side.
+          top: 0, height: '100%', boxSizing: 'border-box', border: '4px solid transparent', backgroundClip: 'padding-box',
+          borderRadius: 999, backgroundColor: alpha(r.ink, 0.14), zIndex: 0,
+          // Springy slide (overshoots a touch, then settles); the stretch comes from glass-flow keyframes.
+          transition: `left ${FLOW_MS}ms ${SPRING}, width ${FLOW_MS}ms ${SPRING}`,
+          '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+        },
       },
     },
-    MuiTab: { styleOverrides: { root: { zIndex: 1, minHeight: 44 } } },
+    MuiTab: {
+      // No touch ripple: on a long press it filled the whole rectangular tab behind the pill.
+      defaultProps: { disableRipple: true },
+      styleOverrides: {
+        root: {
+          zIndex: 1, minHeight: 44, WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none', userSelect: 'none',
+          '&.Mui-focusVisible': { outline: `2px solid ${alpha(r.ink, 0.6)}`, outlineOffset: -4, borderRadius: 999 },
+        },
+      },
+    },
   };
 }
 

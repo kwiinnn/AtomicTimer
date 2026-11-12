@@ -108,3 +108,25 @@ test('glass bars blur more where the lens is unavailable', () => {
   // LensLayer lowers --glass-lens-blur to 3px only where the lens renders; elsewhere the frost stays at 12px.
   expect(css(makeTheme(r, 'X', 'glass').components!.MuiAppBar!.styleOverrides)).toContain('blur(var(--glass-lens-blur, 12px))');
 });
+
+test('glass tab capsule is inset from the pill edge', () => {
+  const ind = makeTheme(r, 'X', 'glass').components!.MuiTabs!.styleOverrides!.indicator;
+  expect(ind).toMatchObject({ top: 0, height: '100%', boxSizing: 'border-box', border: '4px solid transparent', backgroundClip: 'padding-box' });
+});
+
+test('glass tabs have no touch ripple but keep a focus outline', () => {
+  const tab = makeTheme(r, 'X', 'glass').components!.MuiTab!;
+  expect(tab.defaultProps).toMatchObject({ disableRipple: true });
+  expect(css(tab.styleOverrides)).toContain('Mui-focusVisible');
+  expect(css(tab.styleOverrides)).toContain('"WebkitTapHighlightColor":"transparent"');
+});
+
+test('glass tab capsule flows: springy slide plus a stretch on every switch', () => {
+  const t = makeTheme(r, 'X', 'glass').components!;
+  expect(css(t.MuiTabs!.styleOverrides!.indicator)).toMatch(/left \d+ms cubic-bezier\([^)]*1\.\d+/);
+  const base = css(t.MuiCssBaseline!.styleOverrides);
+  expect(base).toContain('@keyframes glass-flow-a');
+  expect(base).toContain('@keyframes glass-flow-b');
+  expect(base).toContain('.glass-tabs[data-flow=\\"a\\"] .MuiTabs-indicator');
+  expect(base).toContain('prefers-reduced-motion');
+});

@@ -91,3 +91,46 @@ test('glass turns the phone tabs into a floating pill', async ({ page, isMobile 
   await page.getByRole('tab', { name: 'Times' }).click();
   await expect(page.getByTestId('times-list')).toBeInViewport();
 });
+
+test('glass tab capsule flows on switch and long presses show no ripple', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await ready(page);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Theme' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Timer' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: 'Times' }).locator('.MuiTouchRipple-root')).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Times' }).click();
+  await expect(page.locator('.glass-tabs')).toHaveAttribute('data-flow', /^[ab]$/);
+  await expect(page.locator('.glass-tabs .MuiTabs-indicator')).toHaveCSS('animation-name', /^glass-flow-[ab]$/);
+});
+
+test('tapping a far tab switches once, without passing through the middle one', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await ready(page);
+  await page.evaluate(() => {
+    const w = window as unknown as { __flips: string[] };
+    w.__flips = [];
+    const tabs = document.querySelector('.glass-tabs')!;
+    new MutationObserver(() => w.__flips.push(tabs.querySelector('[aria-selected="true"]')!.textContent!))
+      .observe(tabs, { attributes: true, attributeFilter: ['data-flow'] });
+  });
+  await page.getByRole('tab', { name: 'Stats' }).click();
+  await expect(page.getByTestId('stats-pane')).toBeInViewport();
+  await page.waitForTimeout(800);
+  expect(await page.evaluate(() => (window as unknown as { __flips: string[] }).__flips)).toEqual(['Stats']);
+});
+
+test('swiping away mid-scroll still updates the tab', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone layout only');
+  await ready(page);
+  await page.getByRole('tab', { name: 'Stats' }).click();
+  // Interrupt the smooth scroll and land on Times instead.
+  await page.locator('[role="tabpanel"]').first().locator('..').evaluate(el => el.scrollTo({ left: el.clientWidth, behavior: 'instant' }));
+  await page.waitForTimeout(1200);
+  await page.locator('[role="tabpanel"]').first().locator('..').evaluate(el => el.scrollTo({ left: 0, behavior: 'instant' }));
+  await expect(page.getByRole('tab', { name: 'Timer' })).toHaveAttribute('aria-selected', 'true');
+});

@@ -152,3 +152,43 @@ test('a chosen font keeps working offline after first use', async ({ page, conte
     return document.fonts.check('500 16px "Inter"');
   })).toBe(true);
 });
+
+async function openSettings(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Settings' }).click();
+  await expect(page.locator('.MuiModal-root')).toHaveCount(0);
+}
+const settingsPaper = (page: import('@playwright/test').Page) => page.locator('main .MuiPaper-root').first();
+
+test('material stays the default style', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await expect(page.getByRole('button', { name: 'Material', exact: true })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('style choice restyles surfaces and persists', async ({ page }) => {
+  await ready(page);
+  await openTheme(page);
+  await page.getByRole('button', { name: 'Liquid Glass', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Liquid Glass', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await openSettings(page);
+  await expect(settingsPaper(page)).toHaveCSS('border-radius', '24px');
+  await expect(settingsPaper(page)).toHaveCSS('backdrop-filter', /blur\(20px\)/);
+  await waitForSavedSettings(page, { uiStyle: 'glass' });
+  await page.reload();
+  await openSettings(page);
+  await expect(settingsPaper(page)).toHaveCSS('border-radius', '24px');
+});
+
+test('each style has its look', async ({ page }) => {
+  await ready(page);
+  for (const [name, radius] of [['Flat', '12px'], ['Outline', '12px'], ['Brutalist', '0px']] as const) {
+    await openTheme(page);
+    await page.getByRole('button', { name, exact: true }).click();
+    await openSettings(page);
+    await expect(settingsPaper(page)).toHaveCSS('border-radius', radius);
+    if (name === 'Flat') await expect(settingsPaper(page)).toHaveCSS('box-shadow', 'none');
+    if (name === 'Outline') await expect(settingsPaper(page)).toHaveCSS('background-color', /^rgba\(\d+, \d+, \d+, 0\)$/);
+    if (name === 'Brutalist') await expect(settingsPaper(page)).toHaveCSS('box-shadow', /4px 4px 0px/);
+  }
+});

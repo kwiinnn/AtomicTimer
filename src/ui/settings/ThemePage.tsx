@@ -12,11 +12,12 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useRef, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { downscaleImage } from '../../platform/images';
 import { APP_FONT_IDS, FONT_IDS, type FontId, type TimerFontId } from '../../core/settings';
-import { timerFamily } from '../theme/fonts';
+import { FONTS, timerFamily } from '../theme/fonts';
 import { FontPicker } from './FontPicker';
+import { StylePicker } from './StylePicker';
 import { PALETTE_IDS, type CustomTheme, type PaletteChoice, type ThemeMode } from '../../core/settings';
 import { t } from '../i18n';
 import { useApp } from '../state/AppContext';
@@ -81,6 +82,10 @@ export function ThemePage() {
     );
   };
 
+  const resolved = useMemo(
+    () => resolveTheme({ palette: settings.palette, customTheme: settings.customTheme, themeMode: settings.themeMode }, systemDark),
+    [settings.palette, settings.customTheme, settings.themeMode, systemDark],
+  );
   const customResolved = resolveTheme({ palette: 'custom', customTheme: settings.customTheme, themeMode: settings.themeMode }, systemDark);
 
   return (
@@ -96,6 +101,11 @@ export function ThemePage() {
             ))}
           </RadioGroup>
           {custom && <Typography variant="body2" color="text.secondary">{t('theme.customModeHint')}</Typography>}
+        </Section>
+
+        <Section title={t('theme.style')}>
+          <StylePicker value={settings.uiStyle} onChange={uiStyle => void updateSettings({ uiStyle })}
+            resolved={resolved} fontFamily={FONTS[settings.appFont].family} />
         </Section>
 
         <Section title={t('theme.presets')}>

@@ -289,4 +289,9 @@ export function lensFor(w: number, h: number, radius: number): { id: string; map
 
 ## Spike outcome
 
-_(filled in by Task 0)_
+- Works in Chromium: `backdrop-filter: var(--lens,) blur(Npx) saturate(1.8)` with `--lens: url(#id)` computes to `url("#id") blur(…)`; with `--lens` unset the empty fallback leaves a valid `blur(…) saturate(…)`.
+- Filter: `filterUnits="userSpaceOnUse" x=0 y=0 width=w height=h color-interpolation-filters="sRGB"`; coordinates are the element's own box. `feImage href=<canvas data URL> width=w height=h preserveAspectRatio="none"` → `feDisplacementMap in="SourceGraphic" scale=16 xChannelSelector="R" yChannelSelector="G"`.
+- Map: per pixel, signed distance d to the rounded-rect edge; within an 18px edge band, magnitude m = (1 − d/18)², R/G = 128 ± normal·m·127 (pointing inward so the edge samples from inside), B 128, A 255; neutral 128 elsewhere.
+- Strength 16 with no blur reads clearly as glass (grid lines bend at edges); blur 3px softens it; **blur 12px erases the lens entirely**.
+- Ruling: Glass float blur is 3px (not 12px) so the lens stays visible; fill alpha raised as needed by the Task 2 contrast sweep to compensate.
+- Screenshot: /tmp/claude-1000/-home-selrahc-Selrahc-Projekte-AtomicTimer/aa15de09-4e5e-447e-b0f6-e54d44e7ffda/scratchpad/lens-spike-strength16-noblur.png
